@@ -16,7 +16,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #0b1120; color: #f8fafc; -webkit-tap-highlight-color: transparent; transition: background 0.5s; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 性別主題顏色：淡粉紅與天空藍 */
+        /* 性別主題顏色 */
         .theme-male { --main: #3b82f6; --accent: #1d4ed8; }
         .theme-female { --main: #f472b6; --accent: #db2777; }
         
@@ -25,7 +25,7 @@
         .border-main { border-color: var(--main); }
         
         .today-mark { background: #ef4444 !important; color: white !important; border-radius: 50%; font-weight: 900; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
-        .workout-day { border: 2px solid var(--main); border-radius: 50%; }
+        .workout-day { border: 1.5px solid var(--main); border-radius: 50%; }
         
         .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; color: #475569; font-size: 14px; }
         .done-history::after { content: '⭐'; position: absolute; bottom: -2px; right: -2px; font-size: 10px; color: #f59e0b; }
@@ -39,6 +39,9 @@
 
         /* 啟動封面樣式 */
         #entry-screen { position: fixed; inset: 0; z-index: 100; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; transition: opacity 0.8s ease; }
+        
+        /* 1. 英雄頭像縮放樣式 */
+        #hero-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; transition: all 0.3s ease; }
     </style>
 </head>
 <body class="pb-20 theme-male" id="app-body">
@@ -46,7 +49,7 @@
     <div id="entry-screen">
         <div class="max-w-xs w-full">
             <h1 class="text-5xl font-black tracking-tighter italic text-white mb-4">Vitality<span class="text-blue-500">PRO</span></h1>
-            <p class="text-slate-500 text-base font-bold tracking-widest mb-16 uppercase">By ycy ∙ Elite Coaching</p>
+            <p class="text-slate-500 text-base font-bold tracking-widest mb-16 uppercase">菁英體能特訓 By ycy</p>
             <button onclick="startApp()" class="w-full bg-blue-600 py-6 rounded-[2.5rem] text-white font-black text-xl shadow-2xl shadow-blue-900/50 animate-pulse">
                 開啟充滿活力的一天
             </button>
@@ -58,7 +61,7 @@
         <header class="mb-8">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-black tracking-tighter italic text-white">
-                    Vitality<span class="text-main">PRO</span><span class="text-sm font-normal text-slate-500 not-italic ml-2">by ycy</span>
+                    Vitality<span class="text-main">PRO</span>
                 </h1>
                 <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-2xl">🔊</button>
             </div>
@@ -83,7 +86,7 @@
         </div>
 
         <section class="glass rounded-[2rem] p-5 shadow-2xl mb-10 text-center">
-            <p class="text-[11px] text-slate-500 mb-4 uppercase font-bold tracking-widest">藍圈為建議運動日 ∙ 僅限今日完成</p>
+            <p class="text-[11px] text-slate-500 mb-4 uppercase font-bold tracking-widest">圈號為建議運動日 ∙ 僅限今日完成</p>
             <div id="calendar-days" class="grid grid-cols-7 gap-2 font-bold"></div>
         </section>
 
@@ -91,7 +94,12 @@
             <p class="text-sm font-black text-main uppercase tracking-widest mb-3">
                 <span class="coach-pronoun">你</span>今天的教練
             </p>
-            <div id="hero-emoji" class="text-8xl mb-6 h-20 flex items-center justify-center">🦸‍♂️</div>
+            
+            <div class="flex justify-center mb-6">
+                <div class="w-24 h-24 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-xl">
+                    <img id="hero-img" src="https://i.postimg.cc/02dzjW8X/1775410232847.png" alt="教練">
+                </div>
+            </div>
             
             <div class="flex flex-col items-center">
                 <div class="relative mb-8">
@@ -110,11 +118,15 @@
 
         <div id="daily-task-list" class="space-y-8 mb-16"></div>
 
-        <div class="flex justify-center gap-12 py-10 border-t border-slate-800" id="badge-row">
+        <div class="flex justify-center gap-12 py-10" id="badge-row">
             <div id="badge-5" class="opacity-10 grayscale text-6xl transition-all duration-1000">🥉</div>
             <div id="badge-10" class="opacity-10 grayscale text-6xl transition-all duration-1000">🥈</div>
             <div id="badge-15" class="opacity-10 grayscale text-6xl transition-all duration-1000">🥇</div>
         </div>
+
+        <footer class="text-center py-6 border-t border-slate-800">
+            <p class="text-xs text-slate-600 font-medium">VitalityPro | Elite Training | By ycy</p>
+        </footer>
     </div>
 
     <div id="reward-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center p-8 backdrop-blur-xl">
@@ -141,11 +153,11 @@
             2: { name: "胸背力量日", goal: "今日目標：強化上半身肌肉張力，讓身形更挺拔。", exercises: ["伏地挺身", "彈力繩划船", "彈力繩胸推"] },
             4: { name: "下肢護膝日", goal: "今日目標：穩定膝關節，增加腿部深層肌力，行動如風。", exercises: ["負重深蹲", "彈力繩死硬舉", "勾腳尖蹬腿"] },
             6: { name: "核心心肺日", goal: "今日目標：燃燒內臟脂肪，啟動全身代謝機制。", exercises: ["核心棒式", "開合跳", "二頭/三頭組合"] },
-            0: { name: "全身大挑戰", goal: "今日目標：全面體能重啟，重返30歲的巔峰活力。", exercises: ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] }
+            0: { name: "全身大挑戰", goal: "今日目標：全面體能重啟，重返巔峰活力。", exercises: ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] }
         };
 
         const allExercises = {
-            "伏地挺身": { sets: 3, reps: 12, tips: "雙手寬於肩，胸貼地後呼氣推起，背部平直。" },
+            "伏地挺身": { sets: 3, reps: 12, tips: "雙手寬於肩，胸貼地後推起，背部平直。" },
             "核心棒式": { sets: 3, reps: "40秒", tips: "保持腰部平直，感受腹部緊繃，不可憋氣。" },
             "負重深蹲": { sets: 3, reps: 12, tips: "重心在腳跟，屁股像坐椅子般下蹲。" },
             "開合跳": { sets: 3, reps: "30秒", tips: "輕盈彈跳，腳尖著地緩衝，手要擊掌。" },
@@ -153,35 +165,44 @@
             "彈力繩死硬舉": { sets: 3, reps: 12, tips: "背挺直，由臀部發力帶起身體。" },
             "二頭/三頭組合": { sets: 3, reps: 12, tips: "控制手肘不動，專注感受手臂肌肉收縮。" },
             "勾腳尖蹬腿": { sets: 3, reps: 15, tips: "用力勾起腳尖，腿部完全伸直，保護膝蓋。" },
-            "彈力繩胸推": { sets: 3, reps: 12, tips: "穩定前推，感受胸大肌擠壓，慢放快推。" }
+            "彈力繩胸推": { sets: 3, reps: 12, tips: "帶子繞過背部，手向前推直，胸肌發力。" }
         };
 
+        // 1. 更新漫威英雄數據，更換圖片連結
         const heroes = [
-            { name: "美國隊長", emoji: "🛡️", m: "我能跟你耗上一整天！動起來！", f: "我能跟妳耗上一整天！動起來！" },
-            { name: "鋼鐵人", emoji: "🚀", m: "我愛你三千次，給我推起來！", f: "我愛妳三千次，給我推起來！" },
-            { name: "驚奇隊長", emoji: "⭐", m: "更高更快更強！超越極限吧！", f: "更高更快更強！超越極限吧！" },
-            { name: "黑寡婦", emoji: "🕸️", m: "肌肉是永恆的，開始特訓！", f: "肌肉是永恆的，開始特訓！" }
+            { name: "美國隊長", img: "https://i.postimg.cc/02dzjW8X/1775410232847.png", m: "我能跟你耗上一整天！動起來！", f: "我能跟妳耗上一整天！動起來！" },
+            { name: "鋼鐵人", img: "https://i.postimg.cc/2SbgTJVF/Screenshot-20260406-012721-Chrome.jpg", m: "我愛你三千次，給我推起來！", f: "我愛妳三千次，給我推起來！" },
+            { name: "雷神索爾", img: "https://i.postimg.cc/ZKgM9cV8/1000046561.jpg", m: "感受力量！你值得擁有雷神之槌！", f: "感受力量！妳值得擁有雷神之槌！" }
         ];
 
         function speak(text, callback) {
             if (!isVoiceOn) { if(callback) callback(); return; }
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'zh-TW'; msg.rate = 1.1;
+            msg.lang = 'zh-TW'; 
+            
+            // 3. Vitality 讀音優化 (微調節奏與音調)
+            if(text.includes("VitalityPro")) {
+                msg.rate = 1.0; // 唸到句子時速率稍微正常
+            } else {
+                msg.rate = 1.1; // 唸單數字或短語時速率快一點
+            }
+
             let done = false;
             const timer = setTimeout(() => { if(!done){ done=true; if(callback) callback(); } }, 6000);
             msg.onend = () => { if(!done){ done=true; clearTimeout(timer); if(callback) callback(); } };
             window.speechSynthesis.speak(msg);
         }
 
-        // --- 啟動與自定義開場白 ---
+        // --- 啟動與 2. 更新後的歡迎詞 ---
         function startApp() {
             const entry = document.getElementById('entry-screen');
             entry.style.opacity = '0';
             setTimeout(() => { entry.style.display = 'none'; }, 800);
             
-            // 使用妳指定的熱情開場白
-            const welcomeMsg = `歡迎來到 VitalityPro by ycy，朋友們，準備好開啟充滿活力的一天嗎？`;
+            // 2. 更新為溫馨熱情的開場白
+            // 3. Vitality (vaɪˋtælətɪ) 的讀音調整
+            const welcomeMsg = `歡迎來到 Vaɪ-tæl-ə-tɪ Pro，朋友們，準備好開啟充滿活力的一天嗎？`;
             speak(welcomeMsg);
         }
 
@@ -242,11 +263,16 @@
             });
         }
 
+        // 1. 開始訓練時更新圖片 src
         function runEx(name) {
             if(workoutState !== 'IDLE') return;
             const hero = heroes[Math.floor(Math.random() * heroes.length)];
             const ex = allExercises[name];
-            document.getElementById('hero-emoji').innerText = hero.emoji;
+            
+            // 更換圖片而不是 Emoji
+            document.getElementById('hero-img').src = hero.img;
+            document.getElementById('hero-img').alt = hero.name;
+            
             document.getElementById('action-coach-name').innerText = "教練：" + hero.name;
             document.getElementById('action-title').innerText = name;
             
@@ -319,8 +345,8 @@
         function showPop() {
             const u = (currentGender === 'male') ? '你' : '妳';
             const history = JSON.parse(localStorage.getItem('vH_ycy_vfinal') || "[]");
-            let msg = `${u}完成了今日特訓！朋友們為${u}感到驕傲，英雄之血在${u}體內沸騰！`;
-            if(history.length >= 15) msg = `${u}就是傳奇復仇者！15 天全勤達成！By ycy`;
+            let msg = `${u}完成了今日特訓！朋友們為${u}感到驕傲，英雄之血在${u}體內沸騰！By ycy`;
+            if(history.length >= 15) msg = `${u}就是傳傳復仇者！15 天全勤達成！By ycy`;
             document.getElementById('reward-msg').innerText = msg;
             document.getElementById('reward-modal').classList.remove('hidden');
             speak(msg);
