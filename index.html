@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VitalityPro by ycy | 復仇者集合版</title>
+    <title>VitalityPro by ycy</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,32 +14,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: #0b1120; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        
-        /* 今天的熱血光圈 */
-        .today-active { 
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important; 
-            color: white !important; 
-            font-weight: 900; 
-            border-radius: 50%; 
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); 
-            transform: scale(1.1); 
-            z-index: 10; 
-        }
-
-        .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; color: #475569; font-size: 11px; }
+        .today-active { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important; color: white !important; font-weight: 900; border-radius: 50%; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); transform: scale(1.1); }
+        .calendar-day { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; position: relative; color: #475569; font-size: 11px; }
         .done-history::after { content: '⭐'; position: absolute; bottom: -2px; right: -2px; font-size: 8px; }
-        
         .progress-ring { transition: stroke-dashoffset 0.3s; transform: rotate(-90deg); transform-origin: 50% 50%; }
         .task-done { border: 2px solid #3b82f6 !important; background-color: rgba(59, 130, 246, 0.1) !important; opacity: 0.6; }
-        .task-done span { color: #3b82f6 !important; }
-        
         input[type=range] { -webkit-appearance: none; background: #1e293b; height: 6px; border-radius: 5px; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #3b82f6; cursor: pointer; }
-
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(2px); } 75% { transform: translateX(-2px); } }
-        .shaking { animation: shake 0.2s infinite; color: #ef4444 !important; }
     </style>
 </head>
 <body class="pb-16">
@@ -49,20 +32,18 @@
         <header class="mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h1 class="text-3xl font-black tracking-tighter italic text-white">
-                    Vitality<span class="text-blue-600">PRO</span> 
-                    <span class="text-[10px] font-normal text-slate-500 not-italic ml-1">by ycy</span>
+                    Vitality<span class="text-blue-500">PRO</span><span class="text-[10px] font-normal text-slate-500 not-italic ml-1">by ycy</span>
                 </h1>
                 <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-2 rounded-xl border border-slate-700 text-lg shadow-lg">🔊</button>
             </div>
             
             <div class="space-y-3">
                 <button onclick="toggleGender()" id="gender-toggle" class="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-700 to-blue-900 text-xs font-black text-white shadow-lg uppercase tracking-widest active:scale-95 transition-all">
-                    切換至女性訓練模式
+                    切換模式 (目前:男性)
                 </button>
-                
                 <div class="glass p-4 rounded-2xl border border-slate-700">
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">⚡️ Pacing Control (秒/次)</span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">⚡️ Pacing Control (秒/次)</span>
                         <span id="pacing-val" class="text-sm font-black text-blue-500">2.0s</span>
                     </div>
                     <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" class="w-full" oninput="updatePacing(this.value)">
@@ -71,8 +52,10 @@
         </header>
 
         <div class="bg-blue-900/20 border border-blue-500/20 rounded-2xl p-4 mb-6 text-center">
-            <p id="hero-name-display" class="text-xs font-bold text-blue-400 mb-1 tracking-widest uppercase italic">你（妳）今天的教練：Ready to Assemble</p>
-            <div class="w-full bg-slate-700 h-1 rounded-full overflow-hidden">
+            <p class="text-xs font-bold text-blue-400 mb-1 tracking-widest uppercase italic">
+                <span id="user-pronoun-header">你</span>今天的教練：<span id="coach-name-display">等待中</span>
+            </p>
+            <div class="w-full bg-slate-700 h-1 rounded-full overflow-hidden mt-2">
                 <div id="task-progress-bar" class="bg-blue-500 h-full transition-all duration-700" style="width: 0%"></div>
             </div>
         </div>
@@ -82,10 +65,7 @@
         </section>
 
         <section class="bg-slate-800/50 rounded-[3rem] p-6 text-white shadow-2xl relative border border-slate-700/50 mb-8 text-center">
-            <div class="mb-4 flex justify-center h-40 items-center">
-                <img id="hero-img-display" src="https://cdn-icons-png.flaticon.com/512/3843/3843032.png" class="w-full h-full object-contain rounded-3xl bg-slate-900/50 p-4" alt="英雄教練">
-            </div>
-
+            <div id="hero-emoji" class="text-7xl mb-4 h-20 flex items-center justify-center">🦸‍♂️</div>
             <div class="flex flex-col items-center">
                 <div class="relative mb-4">
                     <svg width="120" height="120">
@@ -93,17 +73,13 @@
                         <circle id="timer-progress" cx="60" cy="60" r="54" stroke="#3b82f6" stroke-width="6" fill="transparent" stroke-dasharray="340" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="display-val" class="text-5xl font-black italic tracking-tighter">--</span>
+                        <span id="display-val" class="text-5xl font-black italic">--</span>
                     </div>
                 </div>
-
-                <h3 id="action-title" class="text-xl font-black mb-1 text-blue-500 uppercase">等待任務指令</h3>
-                <div id="set-info" class="text-[10px] font-bold text-slate-500 mb-4 tracking-widest uppercase">3 Sets • 12 Reps • 2.0s Pace</div>
-                
-                <div class="bg-slate-900/80 rounded-2xl p-4 w-full border border-slate-700">
-                    <p id="action-guide" class="text-xs text-slate-400 leading-relaxed font-medium italic">
-                        「選個動作，讓不同超級英雄帶領你變強！」
-                    </p>
+                <h3 id="action-title" class="text-xl font-black mb-1 text-blue-500 uppercase">選取任務</h3>
+                <div id="set-info" class="text-[10px] font-bold text-slate-500 mb-4 tracking-widest uppercase italic">3 Sets • 12 Reps</div>
+                <div class="bg-slate-900/80 rounded-2xl p-4 w-full border border-slate-700 min-h-[60px] flex items-center justify-center">
+                    <p id="action-guide" class="text-xs text-slate-400 leading-relaxed font-medium italic">「請點擊動作開始！」</p>
                 </div>
             </div>
         </section>
@@ -113,10 +89,10 @@
 
     <div id="reward-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center p-8 backdrop-blur-xl">
         <div class="bg-slate-900 border border-blue-500/30 rounded-[3.5rem] p-10 text-center max-w-sm w-full">
-            <div class="text-8xl mb-6 text-yellow-500">🏆</div>
-            <h2 class="text-2xl font-black text-white mb-2 italic tracking-tighter">全課程任務達成！</h2>
-            <p id="reward-desc" class="text-slate-400 mb-8 leading-relaxed text-sm font-medium"></p>
-            <button onclick="closeModal()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl">繼續稱霸</button>
+            <div class="text-8xl mb-6">🏆</div>
+            <h2 class="text-2xl font-black text-white mb-2">任務全達成！</h2>
+            <p id="reward-desc" class="text-slate-500 text-sm font-bold uppercase"></p>
+            <button onclick="closeModal()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl mt-6 shadow-xl">繼續變強</button>
         </div>
     </div>
 
@@ -131,26 +107,22 @@
         let sessionCompletedNames = [];
         let pacingSeconds = 2.0;
 
-        // 手機端語音變性別開關 (重要！)
-        let forcesMaleVoice = false;
-
-        // --- 漫威英雄導師 (含圖示連結) ---
-        const heroes = [
-            // 男英雄
-            { name: "美國隊長", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/shield-halved.svg", start: "我能跟妳耗上一整天！為了正義，動起來！", finish: "幹得好，士兵。你讓世界變得更強了。", rest: "休息一下，這就是團隊精神。" },
-            { name: "鋼鐵人", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/robot.svg", start: "我愛妳三千次，所以，給我推起來！賈維斯在看著！", finish: "贾维斯告訴我，數據顯示你現在比我還天才！", rest: "冷卻一下系統。休息三十秒。" },
-            { name: "蜘蛛人", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/spider.svg", start: "好鄰居蜘蛛人來了！能力越大，責任越大，動起來！", finish: "太神了！復仇者聯盟需要你這種人才！", rest: "呼，差點被網黏住。喝口水繼續！" },
-            { name: "浩克", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/user-ninja.svg", start: "浩克！打碎！脂肪！全部打碎！咆哮吧！", finish: "浩克...喜歡...強壯的你！", rest: "浩克...要冷靜...深呼吸..." },
-            { name: "雷神索爾", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/cloud-bolt.svg", start: "感受奧丁之子的力量！為了阿斯嘉的榮耀，舉起它！", finish: "強大的力量！你值得擁有妙爾尼爾！", rest: "休息一下。需要來點阿斯嘉啤酒嗎？" },
-            // 女英雄
-            { name: "黑寡婦", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/vest.svg", start: "疼痛只是大腦的訊號。沒什麼是永恆的，但肌肉是。開始。", finish: "任務完成。妳比我想像中的還要強悍。", rest: "保持警覺，休息也是一種戰術。" },
-            { name: "緋紅女巫", start: "我能修改現實，但我無法幫你跳過這一下！把能量轉化為力量！", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/burst.svg", finish: "妳本身就是力量，根本不需要混沌魔法。", rest: "釋放你的壓力，專注於內在核心。" },
-            { name: "驚奇隊長", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/star.svg", start: "更高、更快、更強！讓我們超越這顆星球的極限！", finish: "這才是銀河守護者該有的樣子，太神了！", rest: "別停下太久，我們還要飛向太空。" },
-            { name: "舒莉", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/dna.svg", start: "數據顯示，慢速才能達到最大收縮。瓦干達萬歲！", finish: "測試結果：你的身體各項指標都達到了巔峰！", rest: "檢查一下循環系統。三十秒休息。" },
-            { name: "葛摩菈", img: "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/skull-crossbones.svg", start: "妳是宇宙最危險、最強大的女人。開始你的訓練！", finish: "妳證明了妳的實力。妳值得這份榮耀。", rest: "別像彼得奎爾一樣軟弱。休息。" }
-        ];
-
-        let activeHero = heroes[0];
+        // 英雄清單，使用函數動態生成 你/妳
+        function getHeroConfig() {
+            const u = (currentGender === 'male') ? '你' : '妳';
+            return [
+                { name: "美國隊長", emoji: "🛡️", start: `我能跟${u}耗上一整天！動起來！`, rest: "戰友，休息三十秒。" },
+                { name: "鋼鐵人", emoji: "🚀", start: `我愛${u}三千次，給我推起來！`, rest: "冷卻一下，賈維斯在監控中。" },
+                { name: "蜘蛛人", emoji: "🕷️", start: `能力越大責任越大！加油！`, rest: "休息一下，我守著！" },
+                { name: "浩克", emoji: "👊", start: `浩克！打碎！脂肪！浩克喜歡強壯的${u}！`, rest: "浩克...要...冷靜。" },
+                { name: "雷神索爾", emoji: "⚡", start: `感受力量！${u}值得擁有妙爾尼爾！`, rest: "喝口水，休息三十秒。" },
+                { name: "黑寡婦", emoji: "🕷️", start: `沒什麼是永恆的，但肌肉是。開始。`, rest: "保持警覺，休息一下。" },
+                { name: "驚奇隊長", emoji: "⭐", start: `更高更快更強！超越極限！`, rest: "別停下，我們還要衝向星際。" },
+                { name: "緋紅女巫", emoji: "🔮", start: `${u}可以掌控這股能量！推起來！`, rest: "釋放壓力，專注呼吸。" },
+                { name: "舒莉", emoji: "🐆", start: "瓦干達萬歲！用科學的力量鍛鍊！", rest: "檢查系統，休息三十秒。" },
+                { name: "葛摩菈", emoji: "🗡️", start: `${u}是宇宙最強的戰士。開始。`, rest: "別軟弱。休息。" }
+            ];
+        }
 
         const schedule = {
             2: { name: "週二：胸背力量日", exercises: ["伏地挺身", "彈力繩划船", "彈力繩胸推"] },
@@ -160,66 +132,57 @@
         };
 
         const allExercises = {
-            "伏地挺身": { intro: "伏地挺身。三組十二下。", type: "REP", goalSet: 3, goalRep: 12 },
-            "核心棒式": { intro: "核心棒式。三組四十秒。", type: "TIME", goalSet: 3, goalTime: 40 },
-            "負重深蹲": { intro: "負重深蹲。三組十二下。", type: "REP", goalSet: 3, goalRep: 12 },
-            "開合跳": { intro: "開合跳。三組三十秒。", type: "TIME", goalSet: 3, goalTime: 30 },
-            "彈力繩划船": { intro: "彈力繩划船。三組十二下。", type: "REP", goalSet: 3, goalRep: 12 },
-            "彈力繩死硬舉": { intro: "彈力繩死硬舉。三組十二下。", type: "REP", goalSet: 3, goalRep: 12 },
-            "二頭/三頭組合": { intro: "手臂強化。三組十二下。", type: "REP", goalSet: 3, goalRep: 12 },
-            "勾腳尖蹬腿": { intro: "勾腳尖蹬腿。三組十五下。", type: "REP", goalSet: 3, goalRep: 15 },
-            "彈力繩胸推": { intro: "彈力繩胸推。三組十二下。", type: "REP", goalSet: 3, goalRep: 12 }
+            "伏地挺身": { type: "REP", goalSet: 3, goalRep: 12 },
+            "核心棒式": { type: "TIME", goalSet: 3, goalTime: 40 },
+            "負重深蹲": { type: "REP", goalSet: 3, goalRep: 12 },
+            "開合跳": { type: "TIME", goalSet: 3, goalTime: 30 },
+            "彈力繩划船": { type: "REP", goalSet: 3, goalRep: 12 },
+            "彈力繩死硬舉": { type: "REP", goalSet: 3, goalRep: 12 },
+            "二頭/三頭組合": { type: "REP", goalSet: 3, goalRep: 12 },
+            "勾腳尖蹬腿": { type: "REP", goalSet: 3, goalRep: 15 },
+            "彈力繩胸推": { type: "REP", goalSet: 3, goalRep: 12 }
         };
 
-        // --- 語音隨機性別控制 (核心升級) ---
-        function speak(t, callback) {
+        function speak(text, callback) {
             if (!isVoiceOn) { if(callback) callback(); return; }
             window.speechSynthesis.cancel();
-            
-            const msg = new SpeechSynthesisUtterance(t);
+            const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'zh-TW';
             msg.rate = 1.0;
-            
-            // 重要：瀏覽器語音性別隨機邏輯
-            if (window.speechSynthesis.getVoices().length > 0) {
-                // 找到所有中文語音
-                const chineseVoices = window.speechSynthesis.getVoices().filter(voice => voice.lang.includes('zh'));
-                
-                // 隨機選一個 (可能在手機上沒有太多選擇，但如果是 iPhone 或 macOS，會有男女聲可選)
-                if (chineseVoices.length > 0) {
-                    msg.voice = chineseVoices[Math.floor(Math.random() * chineseVoices.length)];
-                }
-            } else {
-                // 手機端第一次讀取時可能沒聲音，強制第一次隨機一下
-                msg.pitch = Math.random() < 0.5 ? 0.9 : 1.1; 
-            }
-
-            if(callback) m.onend = callback;
+            const voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('zh'));
+            if(voices.length > 0) msg.voice = voices[Math.floor(Math.random() * voices.length)];
+            msg.onend = () => { if(callback) callback(); };
             window.speechSynthesis.speak(msg);
         }
 
         function updatePacing(val) {
             pacingSeconds = parseFloat(val);
             document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s";
-            document.getElementById('set-info').innerText = `3 Sets • ${pacingSeconds.toFixed(1)}s Pace`;
-            localStorage.setItem('vp_ycy_pacing_ мастер', pacingSeconds);
+            localStorage.setItem('vp_ycy_pacing', pacingSeconds);
         }
 
         function initApp() {
-            const saved = localStorage.getItem('vp_ycy_pacing_ мастер');
-            if(saved) {
-                pacingSeconds = parseFloat(saved);
+            const savedP = localStorage.getItem('vp_ycy_pacing');
+            if(savedP) {
+                pacingSeconds = parseFloat(savedP);
                 document.getElementById('pacing-slider').value = pacingSeconds;
                 document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s";
-                document.getElementById('set-info').innerText = `3 Sets • ${pacingSeconds.toFixed(1)}s Pace`;
             }
             renderCalendar();
             renderDailyTasks();
+            updateUIPronoun();
+            window.speechSynthesis.getVoices(); // 預熱
+        }
+
+        function updateUIPronoun() {
+            const u = (currentGender === 'male') ? '你' : '妳';
+            document.getElementById('user-pronoun-header').innerText = u;
+            document.getElementById('reward-desc').innerText = `${u}是真正的英雄！By ycy`;
         }
 
         function renderDailyTasks() {
             const today = new Date().getDay();
-            const taskInfo = schedule[today] || { name: "今日休息修復日", exercises: [] };
+            const taskInfo = schedule[today] || { name: "今日修復日", exercises: [] };
             const listEl = document.getElementById('daily-task-list');
             listEl.innerHTML = '';
             
@@ -227,108 +190,98 @@
                 const isDone = sessionCompletedNames.includes(name);
                 const btn = document.createElement('button');
                 btn.className = `glass w-full p-5 rounded-[2rem] flex justify-between items-center px-8 transition-all ${isDone ? 'task-done' : 'active:scale-95'}`;
-                btn.innerHTML = `<span class="font-black text-sm uppercase">${isDone ? 'Mission Clear: ' : ''}${name}</span><span class="text-[9px] font-bold opacity-30">LEVEL 3</span>`;
-                if (!isDone) btn.onclick = () => startExerciseFlow(name);
+                btn.innerHTML = `<span class="font-black text-sm uppercase">${isDone ? '✅ ' : ''}${name}</span><span class="text-[9px] font-bold opacity-30">LEVEL 3</span>`;
+                if (!isDone) btn.onclick = () => startExercise(name);
                 listEl.appendChild(btn);
             });
 
             const total = taskInfo.exercises.length;
             if (total > 0) {
-                const percent = Math.round((sessionCompletedNames.length / total) * 100);
-                document.getElementById('task-progress-bar').style.width = percent + "%";
+                const p = Math.round((sessionCompletedNames.length / total) * 100);
+                document.getElementById('task-progress-bar').style.width = p + "%";
             }
         }
 
-        function startExerciseFlow(name) {
+        function startExercise(name) {
             if(workoutState !== 'IDLE') return;
+            const heroList = getHeroConfig();
+            const hero = heroList[Math.floor(Math.random() * heroList.length)];
             
-            // --- 重大改動：隨機抽一個英雄教練 ---
-            activeHero = heroes[Math.floor(Math.random() * heroes.length)];
-            document.getElementById('hero-name-display').innerText = `你（妳）今天的教練：${activeHero.name}`;
-            document.getElementById('hero-img-display').src = activeHero.img;
+            document.getElementById('coach-name-display').innerText = hero.name;
+            document.getElementById('hero-emoji').innerText = hero.emoji;
+            currentEx = { ...allExercises[name], name: name, hero: hero };
             
-            currentEx = { ...allExercises[name], name: name };
             setCounter = 1;
             workoutState = 'INTRO';
             document.getElementById('action-title').innerText = name;
-            document.getElementById('action-guide').innerText = `${activeHero.name}：${activeHero.start}`;
+            document.getElementById('action-guide').innerText = hero.start;
             
-            speak(activeHero.start, () => startSet());
+            speak(hero.start, () => startSet());
         }
 
         function startSet() {
             workoutState = 'WORKING';
             repCounter = 0;
-            document.getElementById('display-label').innerText = `SET ${setCounter}`;
-            document.getElementById('timer-progress').style.stroke = "#3b82f6";
-            speak(`第 ${setCounter} 組，以 ${pacingSeconds.toFixed(1)}秒節奏，開始！`, () => {
-                if(currentEx.goalRep) runRepCycle();
-                else runTimeCycle();
+            document.getElementById('display-val').innerText = "0";
+            speak(`第 ${setCounter} 組，開始！`, () => {
+                if(currentEx.type === "REP") runRep();
+                else runTime();
             });
         }
 
-        function runRepCycle() {
+        function runRep() {
             if (repCounter < currentEx.goalRep) {
                 repCounter++;
                 document.getElementById('display-val').innerText = repCounter;
                 speak(`${repCounter}`);
-                timerInterval = setTimeout(() => {
-                    runRepCycle();
-                }, pacingSeconds * 1000);
+                timerInterval = setTimeout(runRep, pacingSeconds * 1000);
             } else {
                 finishSet();
             }
         }
 
-        function runTimeCycle() {
+        function runTime() {
             let left = currentEx.goalTime;
             timerInterval = setInterval(() => {
                 left--;
                 document.getElementById('display-val').innerText = left;
-                if(left === 3) { document.getElementById('display-val').classList.add('shaking'); speak("三、二、一！撐住！"); }
-                if(left <= 0) { 
-                    clearInterval(timerInterval); 
-                    document.getElementById('display-val').classList.remove('shaking');
-                    finishSet(); 
-                }
+                if(left <= 3 && left > 0) speak(`${left}`);
+                if(left <= 0) { clearInterval(timerInterval); finishSet(); }
             }, 1000);
         }
 
         function finishSet() {
-            if (setCounter < currentEx.goalSet) startRest();
-            else completeExercise();
+            if (setCounter < currentEx.goalSet) {
+                workoutState = 'RESTING';
+                let r = 30;
+                document.getElementById('timer-progress').style.stroke = "#10b981";
+                speak(currentEx.hero.rest);
+                timerInterval = setInterval(() => {
+                    r--; document.getElementById('display-val').innerText = r;
+                    if(r <= 0) { clearInterval(timerInterval); setCounter++; startSet(); }
+                }, 1000);
+            } else {
+                completeEx();
+            }
         }
 
-        function startRest() {
-            workoutState = 'RESTING';
-            let r = 30;
-            document.getElementById('display-label').innerText = "REST";
-            document.getElementById('timer-progress').style.stroke = "#10b981";
-            speak(activeHero.rest);
-            timerInterval = setInterval(() => {
-                r--; document.getElementById('display-val').innerText = r;
-                if(r <= 0) { clearInterval(timerInterval); setCounter++; startSet(); }
-            }, 1000);
-        }
-
-        function completeExercise() {
+        function completeEx() {
             workoutState = 'IDLE';
             sessionCompletedNames.push(currentEx.name);
             renderDailyTasks();
-            speak(activeHero.finish);
-            const todayTasks = (schedule[new Date().getDay()] || {exercises:[]}).exercises;
-            if (sessionCompletedNames.length === todayTasks.length) saveRecord();
+            const count = (schedule[new Date().getDay()] || {exercises:[]}).exercises.length;
+            if (sessionCompletedNames.length === count) saveFinal();
+            else speak("完成！下一項任務！");
         }
 
-        function saveRecord() {
+        function saveFinal() {
             const h = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
             const d = new Date().toLocaleDateString();
             if(!h.includes(d)) {
                 h.push(d); localStorage.setItem('workoutHistory', JSON.stringify(h));
-                renderCalendar(); updateBadges();
-                document.getElementById('reward-desc').innerText = "美隊說：這是一個值得紀念的日子！今日任務圓滿達成！";
+                renderCalendar();
                 document.getElementById('reward-modal').classList.remove('hidden');
-                speak("全任務達成！你是真正的傳奇！");
+                speak("今日所有課程圓滿達成！By ycy");
             }
         }
 
@@ -345,17 +298,19 @@
             }
         }
 
-        function updateBadges() {
-            const count = JSON.parse(localStorage.getItem('workoutHistory') || "[]").length;
-            if(count >= 5) document.getElementById('badge-row').classList.remove('grayscale', 'opacity-20');
+        function toggleVoice() { isVoiceOn = !isVoiceOn; document.getElementById('voice-toggle').innerText = isVoiceOn ? '🔊' : '🔇'; }
+        
+        function toggleGender() { 
+            currentGender = currentGender === 'male' ? 'female' : 'male'; 
+            document.getElementById('gender-toggle').innerText = `切換模式 (目前:${currentGender === 'male' ? '男' : '女'}性)`;
+            sessionCompletedNames = []; 
+            initApp(); 
         }
 
-        function toggleVoice() { isVoiceOn = !isVoiceOn; document.getElementById('voice-toggle').innerText = isVoiceOn ? '🔊' : '🔇'; }
-        function toggleGender() { currentGender = currentGender==='male'?'female':'male'; document.getElementById('gender-toggle').innerText = `切換模式 (目前:${currentGender==='male'?'男':'女'}性)`; sessionCompletedNames = []; initApp(); }
         function closeModal() { document.getElementById('reward-modal').classList.add('hidden'); }
-        function clearHistory() { if(confirm("重置歷史？")) { localStorage.clear(); location.reload(); } }
+        function clearHistory() { if(confirm("清除紀錄？")) { localStorage.clear(); location.reload(); } }
 
-        initApp();
+        window.onload = initApp;
     </script>
 </body>
 </html>
