@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitality Pro 55+ | 泰森戰魂最終版</title>
+    <title>Vitality Pro 55+ | 自定義節奏版</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,254 +16,276 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        
-        .today-active { 
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important; 
-            color: white !important; 
-            font-weight: 900; 
-            border-radius: 50%; 
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); 
-            transform: scale(1.15); 
-            z-index: 10; 
-        }
-
-        .calendar-day { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; position: relative; color: #64748b; font-size: 12px; }
-        .done-check::after { content: '🔥'; position: absolute; bottom: -2px; right: -2px; font-size: 10px; }
+        .today-active { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important; color: white !important; font-weight: 900; border-radius: 50%; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); transform: scale(1.1); }
+        .calendar-day { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; position: relative; color: #64748b; font-size: 10px; }
+        .done-history::after { content: '🔥'; position: absolute; bottom: -2px; right: -2px; font-size: 8px; }
         .progress-ring { transition: stroke-dashoffset 0.3s; transform: rotate(-90deg); transform-origin: 50% 50%; }
-        .active-card { border: 2px solid #ef4444; background-color: rgba(239, 68, 68, 0.2); }
-        .exercise-gif { width: 100%; height: 180px; object-fit: contain; border-radius: 2rem; background: #1e293b; padding: 15px; }
+        .task-done { border: 2px solid #10b981 !important; background-color: rgba(16, 185, 129, 0.1) !important; opacity: 0.6; }
+        .task-done span { color: #10b981 !important; }
         
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
-        .shake-timer { animation: shake 0.5s infinite; color: #ef4444 !important; }
+        /* 自定義滑桿樣式 */
+        input[type=range] { -webkit-appearance: none; background: #334155; height: 6px; border-radius: 5px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #ef4444; cursor: pointer; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-10">
 
     <div class="max-w-md mx-auto px-6 py-4">
         
-        <header class="mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-3xl font-black tracking-tighter text-white">Vitality<span class="text-red-500">PRO</span></h1>
-                <div class="flex gap-2">
-                    <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-2 rounded-xl border border-slate-700 text-lg">🔊</button>
-                </div>
-            </div>
-            <button onclick="toggleGender()" id="gender-toggle" class="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 text-xs font-black text-white shadow-lg shadow-blue-900/40 uppercase tracking-widest active:scale-95 transition-all">
-                切換至女性訓練模式
-            </button>
+        <header class="mb-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-tighter italic text-white">Vitality<span class="text-red-500">PRO</span></h1>
+            <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-2 rounded-xl border border-slate-700 text-lg">🔊</button>
         </header>
 
-        <section class="glass rounded-[2rem] p-4 shadow-2xl mb-6">
-            <div id="calendar-days" class="grid grid-cols-7 gap-1 text-center text-sm font-bold">
+        <div class="space-y-3 mb-6">
+            <button onclick="toggleGender()" id="gender-toggle" class="w-full py-3 rounded-2xl bg-slate-800 text-[10px] font-black text-slate-400 border border-slate-700 uppercase tracking-widest transition-all">目前：男性訓練模式</button>
+            
+            <div class="glass p-4 rounded-2xl border border-slate-700">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">⚡️ 動作節奏 (秒/次)</span>
+                    <span id="pacing-val" class="text-sm font-black text-red-500">2.0s</span>
                 </div>
+                <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" class="w-full" oninput="updatePacing(this.value)">
+            </div>
+        </div>
+
+        <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-4 mb-6">
+            <div class="flex justify-between text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-widest">
+                <span id="task-summary">載入課表中...</span>
+                <span id="task-percent">0%</span>
+            </div>
+            <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                <div id="task-progress-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <section class="glass rounded-[1.5rem] p-4 shadow-2xl mb-6">
+            <div id="calendar-days" class="grid grid-cols-7 gap-1 text-center font-bold"></div>
         </section>
 
-        <section class="bg-slate-800/50 rounded-[2.5rem] p-6 text-white shadow-2xl relative border border-slate-700/50 mb-6 text-center">
-            <div class="mb-4 flex justify-center">
-                <img id="exercise-img" src="https://cdn-icons-png.flaticon.com/512/3843/3843032.png" class="exercise-gif" alt="動作示範">
-            </div>
-
+        <section class="bg-slate-800 rounded-[2.5rem] p-6 text-white shadow-2xl relative border border-slate-700/50 mb-6 text-center">
             <div class="flex flex-col items-center">
                 <div class="relative mb-4">
-                    <svg width="120" height="120">
-                        <circle cx="60" cy="60" r="54" stroke="#334155" stroke-width="6" fill="transparent" />
-                        <circle id="timer-progress" cx="60" cy="60" r="54" stroke="#ef4444" stroke-width="6" fill="transparent" stroke-dasharray="340" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring" />
+                    <svg width="140" height="140">
+                        <circle cx="70" cy="70" r="62" stroke="#1e293b" stroke-width="8" fill="transparent" />
+                        <circle id="timer-progress" cx="70" cy="70" r="62" stroke="#ef4444" stroke-width="8" fill="transparent" stroke-dasharray="390" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="timer-val" class="text-4xl font-black italic tracking-tighter">00</span>
-                        <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Beat</span>
+                        <span id="display-val" class="text-5xl font-black italic">--</span>
+                        <span id="display-label" class="text-[8px] font-bold text-slate-500 uppercase tracking-widest italic">Pacing</span>
                     </div>
                 </div>
 
-                <h3 id="action-title" class="text-lg font-black mb-1 text-red-500 uppercase tracking-tight">等待戰鬥</h3>
-                <div class="bg-slate-900/80 rounded-xl p-3 w-full border border-slate-700">
-                    <p id="action-guide" class="text-[10px] text-slate-400 leading-relaxed font-medium">
-                        「跟著我的節奏：一、二、三、四！」
+                <h3 id="action-title" class="text-xl font-black mb-1 text-red-500 uppercase">準備訓練</h3>
+                <div id="set-info" class="text-[10px] font-bold text-slate-500 mb-4 tracking-tighter uppercase">3 Sets • Custom Pacing</div>
+                
+                <div class="bg-slate-900/80 rounded-2xl p-4 w-full border border-slate-700">
+                    <p id="action-guide" class="text-xs text-slate-400 leading-relaxed font-medium italic">
+                        「根據體感調整節奏，慢速更有感。」
                     </p>
                 </div>
             </div>
         </section>
 
-        <div class="space-y-6">
-            <div class="grid grid-cols-2 gap-3" id="base-list"></div>
-            <div class="grid grid-cols-1 gap-3" id="band-list"></div>
-        </div>
-
-        <div class="mt-10 flex flex-col items-center gap-4">
-            <div id="badge-row" class="flex gap-6 mb-2">
-                <div id="b5" class="text-3xl grayscale opacity-20">🥉</div>
-                <div id="b10" class="text-3xl grayscale opacity-20">🥈</div>
-                <div id="b15" class="text-3xl grayscale opacity-20">🥇</div>
-            </div>
-            <button onclick="clearHistory()" class="text-[10px] text-slate-500 underline uppercase">重置紀錄</button>
-        </div>
+        <div id="daily-task-list" class="space-y-3 mb-10"></div>
     </div>
 
     <div id="reward-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center p-8 backdrop-blur-xl">
-        <div class="bg-slate-900 border border-red-500/30 rounded-[3rem] p-8 text-center max-w-sm w-full shadow-2xl">
-            <div id="reward-icon" class="text-7xl mb-4">🏆</div>
-            <h2 id="reward-title" class="text-2xl font-black text-white mb-2">榮耀覺醒</h2>
-            <p id="reward-desc" class="text-slate-400 mb-6 leading-relaxed text-xs font-medium"></p>
-            <button onclick="closeModal()" class="w-full bg-red-600 text-white font-black py-3 rounded-xl shadow-lg">繼續變強</button>
+        <div class="bg-slate-900 border border-red-500/30 rounded-[3rem] p-8 text-center max-w-sm w-full">
+            <div class="text-7xl mb-6 text-yellow-500">🏆</div>
+            <h2 class="text-2xl font-black text-white mb-2 italic tracking-tighter">全任務達成！</h2>
+            <p id="reward-desc" class="text-slate-400 mb-8 leading-relaxed text-sm"></p>
+            <button onclick="closeModal()" class="w-full bg-red-600 text-white font-black py-4 rounded-2xl shadow-xl active:scale-95">繼續變強</button>
         </div>
     </div>
 
     <script>
         let currentGender = 'male';
-        let countdown;
         let isVoiceOn = true;
+        let workoutState = 'IDLE'; 
+        let currentEx = null;
+        let setCounter = 1;
+        let repCounter = 0;
+        let timerInterval;
+        let sessionCompletedNames = [];
+        
+        // 關鍵：節奏秒數 (預設2秒，可調整至5秒)
+        let pacingSeconds = 2;
 
-        const milestones = {
-            5: { title: "【銅級：登山客】", desc: "戰友！你現在可以踏平象山！雙腿已經覺醒了！", icon: "🥉" },
-            10: { title: "【銀級：大力士】", desc: "咆哮吧！你現在可以單手舉起一頭小牛！這就是力量！", icon: "🥈" },
-            15: { title: "【金級：不老泰森】", desc: "巔峰！你壯得跟泰森一樣！重回30歲體能！", icon: "🥇" }
+        const schedule = {
+            2: { name: "週二：胸背力量日", exercises: ["伏地挺身", "彈力繩划船", "彈力繩胸推"] },
+            4: { name: "週四：下肢護膝日", exercises: ["負重深蹲", "彈力繩死硬舉", "勾腳尖蹬腿"] },
+            6: { name: "週六：核心心肺日", exercises: ["核心棒式", "開合跳", "二頭/三頭組合"] },
+            0: { name: "週日：全身大循環", exercises: ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] }
         };
 
-        const exercises = {
-            male: {
-                base: [
-                    { name: "伏地挺身", sec: 45, icon: "💪", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXJreW90bWxsbm9hZDNvNHRrMmdsZTR6bjZnd3ZscDR6NHZsayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKpxv42I89mQJLW/giphy.gif", speech: "伏地挺身！撐起來！泰森在看著你！", guide: "背部平直，胸部貼地後推起。" },
-                    { name: "核心棒式", sec: 60, icon: "🧘", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZ3Z0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKSj0q942H2e5tS/giphy.gif", speech: "棒式！鎖死你的核心！不准掉下去！", guide: "手肘撐地，身體呈直線，核心收緊。" },
-                    { name: "負重深蹲", sec: 45, icon: "🦵", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZ3Z0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKv6eSqcE2C6Iyk/giphy.gif", speech: "深蹲！像大樹一樣穩！站起來！", guide: "重心在腳跟，背挺直，屁股後坐。" },
-                    { name: "開合跳", sec: 45, icon: "🏃", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXJreW90bWxsbm9hZDNvNHRrMmdsZTR6bjZnd3ZscDR6NHZsayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKpxv42I89mQJLW/giphy.gif", speech: "開合跳！燃燒吧心肺！跟上節奏！", guide: "保持輕盈跳動，膝蓋微彎緩衝。" }
-                ],
-                band: [
-                    { name: "彈力繩划船", sec: 45, icon: "🛶", img: "https://cdn-icons-png.flaticon.com/512/3843/3843015.png", speech: "彈力繩划船！背肌夾緊！拉動你的命運！", guide: "帶子繞過腳底，背部夾緊往後拉。" },
-                    { name: "彈力繩死硬舉", sec: 45, icon: "🏋️", img: "https://cdn-icons-png.flaticon.com/512/3843/3843022.png", speech: "死硬舉！地心引力踩在腳下！用力！", guide: "雙腳踩帶，背挺，髖部發力向上。" }
-                ]
-            },
-            female: {
-                base: [
-                    { name: "跪姿伏地", sec: 45, icon: "🌸", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXJreW90bWxsbm9hZDNvNHRrMmdsZTR6bjZnd3ZscDR6NHZsayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKpxv42I89mQJLW/giphy.gif", speech: "跪姿伏地！你是最有力量的女性！推起來！", guide: "膝蓋著地，手臂慢下慢上。" },
-                    { name: "扶椅深蹲", sec: 45, icon: "🪑", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZ3Z0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKv6eSqcE2C6Iyk/giphy.gif", speech: "扶椅深蹲！強健雙腿，保護膝蓋！每一蹲都是健康！", guide: "扶住椅背，下蹲再站起。" }
-                ],
-                band: [
-                    { name: "勾腳尖蹬腿", sec: 60, icon: "🛡️", img: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png", speech: "守護膝蓋！用力勾起腳尖！蹬出去！", guide: "坐姿下勾腳伸直腿，強化股四頭肌。" }
-                ]
-            }
+        const allExercises = {
+            "伏地挺身": { intro: "伏地挺身。三組，每組十二下。穩定推起，感受胸肌。", type: "REP", goalSet: 3, goalRep: 12 },
+            "核心棒式": { intro: "核心棒式。三組，每組四十秒。撐住就是勝利！", type: "TIME", goalSet: 3, goalTime: 40 },
+            "負重深蹲": { intro: "負重深蹲。三組，每組十二下。保護膝蓋，慢速下蹲。", type: "REP", goalSet: 3, goalRep: 12 },
+            "開合跳": { intro: "開合跳。三組，每組三十秒。輕盈跳動。", type: "TIME", goalSet: 3, goalTime: 30 },
+            "彈力繩划船": { intro: "彈力繩划船。三組，每組十二下。背部夾緊。", type: "REP", goalSet: 3, goalRep: 12 },
+            "彈力繩死硬舉": { intro: "彈力繩死硬舉。三組，每組十二下。背挺直上拉。", type: "REP", goalSet: 3, goalRep: 12 },
+            "二頭/三頭組合": { intro: "手臂強化。三組，每組十二下。慢速控制。", type: "REP", goalSet: 3, goalRep: 12 },
+            "勾腳尖蹬腿": { intro: "勾腳尖蹬腿。三組，每組十五下。保護膝蓋最強動作。", type: "REP", goalSet: 3, goalRep: 15 },
+            "彈力繩胸推": { intro: "彈力繩胸推。三組，每組十二下。穩定前推。", type: "REP", goalSet: 3, goalRep: 12 }
         };
+
+        function speak(t, callback) {
+            if (!isVoiceOn) { if(callback) callback(); return; }
+            window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(t);
+            m.lang = 'zh-TW'; m.rate = 1.0;
+            if(callback) m.onend = callback;
+            window.speechSynthesis.speak(m);
+        }
+
+        function updatePacing(val) {
+            pacingSeconds = parseFloat(val);
+            document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s";
+            localStorage.setItem('userPacing', pacingSeconds);
+        }
 
         function initApp() {
-            renderCalendar(); renderExercises(); updateBadges();
+            // 讀取儲存的節奏
+            const savedPacing = localStorage.getItem('userPacing');
+            if(savedPacing) {
+                pacingSeconds = parseFloat(savedPacing);
+                document.getElementById('pacing-slider').value = pacingSeconds;
+                document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s";
+            }
+            renderCalendar();
+            renderDailyTasks();
         }
 
-        function speak(text) {
-            if (!isVoiceOn) return;
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'zh-TW'; msg.rate = 1.0;
-            window.speechSynthesis.speak(msg);
-        }
+        function renderDailyTasks() {
+            const today = new Date().getDay();
+            const taskInfo = schedule[today] || { name: "今日修復日", exercises: [] };
+            document.getElementById('task-summary').innerText = taskInfo.name;
+            const listEl = document.getElementById('daily-task-list');
+            listEl.innerHTML = '';
+            
+            taskInfo.exercises.forEach(name => {
+                const isDone = sessionCompletedNames.includes(name);
+                const btn = document.createElement('button');
+                btn.className = `glass w-full p-5 rounded-[2rem] flex justify-between items-center px-8 transition-all ${isDone ? 'task-done' : 'active:scale-95'}`;
+                btn.innerHTML = `<span class="font-black text-sm">${isDone ? '✅ ' : ''}${name}</span><span class="text-[9px] font-bold opacity-30">3 SETS</span>`;
+                if (!isDone) btn.onclick = () => startExercise(name);
+                listEl.appendChild(btn);
+            });
 
-        function toggleVoice() {
-            isVoiceOn = !isVoiceOn;
-            document.getElementById('voice-toggle').innerText = isVoiceOn ? '🔊' : '🔇';
-        }
-
-        function renderCalendar() {
-            const now = new Date(); const history = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
-            const container = document.getElementById('calendar-days'); container.innerHTML = '';
-            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-
-            for (let i = 0; i < firstDay; i++) container.innerHTML += '<div></div>';
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = new Date(now.getFullYear(), now.getMonth(), d).toLocaleDateString();
-                const isToday = dateStr === new Date().toLocaleDateString();
-                const isDone = history.includes(dateStr);
-                container.innerHTML += `<div class="calendar-day ${isToday ? 'today-active' : ''} ${isDone ? 'done-check' : ''}">${d}</div>`;
+            const total = taskInfo.exercises.length;
+            if (total > 0) {
+                const p = Math.round((sessionCompletedNames.length / total) * 100);
+                document.getElementById('task-percent').innerText = p + "%";
+                document.getElementById('task-progress-bar').style.width = p + "%";
             }
         }
 
-        function renderExercises() {
-            const baseList = document.getElementById('base-list'); const bandList = document.getElementById('band-list');
-            baseList.innerHTML = ''; bandList.innerHTML = '';
-            const data = exercises[currentGender];
+        function startExercise(name) {
+            if(workoutState !== 'IDLE') return;
+            currentEx = { ...allExercises[name], name: name };
+            setCounter = 1;
+            workoutState = 'INTRO';
+            document.getElementById('action-title').innerText = name;
+            document.getElementById('action-guide').innerText = currentEx.intro;
+            speak(currentEx.intro, () => startSet());
+        }
 
-            data.base.forEach(ex => {
-                const card = document.createElement('button');
-                card.className = "glass p-6 rounded-[2rem] flex flex-col items-center transition-all active:scale-95";
-                card.onclick = () => startTimer(ex, card);
-                card.innerHTML = `<div class="text-3xl mb-1">${ex.icon}</div><div class="text-[10px] font-black text-slate-400 uppercase">${ex.name}</div>`;
-                baseList.appendChild(card);
-            });
-
-            data.band.forEach(ex => {
-                const card = document.createElement('button');
-                card.className = "glass p-4 rounded-2xl flex justify-between items-center px-6 transition-all active:scale-95";
-                card.onclick = () => startTimer(ex, card);
-                card.innerHTML = `<div class="flex items-center gap-3"><span class="text-2xl">${ex.icon}</span><span class="text-sm font-black text-white">${ex.name}</span></div><span class="text-[9px] font-bold text-red-500">BANDS</span>`;
-                bandList.appendChild(card);
+        function startSet() {
+            workoutState = 'WORKING';
+            repCounter = 0;
+            document.getElementById('display-label').innerText = `SET ${setCounter}`;
+            document.getElementById('timer-progress').style.stroke = "#ef4444";
+            speak(`第 ${setCounter} 組，以 ${pacingSeconds} 秒節奏，開始！`, () => {
+                if(currentEx.type === 'REP') runRepCycle();
+                else runTimeCycle();
             });
         }
 
-        function startTimer(ex, el) {
-            clearInterval(countdown);
-            document.querySelectorAll('button').forEach(b => b.classList.remove('active-card'));
-            el.classList.add('active-card');
-            document.getElementById('action-title').innerText = ex.name;
-            document.getElementById('action-guide').innerText = ex.guide;
-            document.getElementById('exercise-img').src = ex.img;
-            
-            speak(ex.speech);
-
-            let left = ex.sec; 
-            const timerEl = document.getElementById('timer-val');
-            
-            countdown = setInterval(() => {
-                left--; timerEl.innerText = left;
-                document.getElementById('timer-progress').style.strokeDashoffset = 340 - (left / ex.sec) * 340;
-
-                // --- 新增：數數提示音 (每 4 秒一個循環) ---
-                if (left > 3) {
-                    const countInCycle = (ex.sec - left) % 4;
-                    if (countInCycle === 1) speak("一");
-                    if (countInCycle === 2) speak("二");
-                    if (countInCycle === 3) speak("三");
-                    if (countInCycle === 0) speak("四");
-                }
-
-                if (left === 3) { timerEl.classList.add('shake-timer'); speak("三、二、一！撐住！"); }
+        function runRepCycle() {
+            if (repCounter < currentEx.goalRep) {
+                repCounter++;
+                document.getElementById('display-val').innerText = repCounter;
+                speak(`${repCounter}`);
                 
-                if (left <= 0) {
-                    clearInterval(countdown); timerEl.classList.remove('shake-timer');
-                    saveRecord(); speak("完成！你是真正的傳奇！");
-                }
+                // --- 根據滑桿調整節奏 ---
+                timerInterval = setTimeout(() => {
+                    runRepCycle();
+                }, pacingSeconds * 1000);
+            } else {
+                finishSet();
+            }
+        }
+
+        function runTimeCycle() {
+            let left = currentEx.goalTime;
+            document.getElementById('display-val').innerText = left;
+            timerInterval = setInterval(() => {
+                left--;
+                document.getElementById('display-val').innerText = left;
+                document.getElementById('timer-progress').style.strokeDashoffset = 390 - (left/currentEx.goalTime)*390;
+                if(left <= 3 && left > 0) speak(`${left}`);
+                if(left <= 0) { clearInterval(timerInterval); finishSet(); }
             }, 1000);
         }
 
-        function saveRecord() {
-            const history = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
-            const today = new Date().toLocaleDateString();
-            if (!history.includes(today)) {
-                history.push(today); localStorage.setItem('workoutHistory', JSON.stringify(history));
-                renderCalendar(); updateBadges();
-                if (milestones[history.length]) showReward(milestones[history.length]);
+        function finishSet() {
+            if (setCounter < currentEx.goalSet) startRest();
+            else completeExercise();
+        }
+
+        function startRest() {
+            workoutState = 'RESTING';
+            let r = 30;
+            document.getElementById('display-label').innerText = "REST";
+            document.getElementById('timer-progress').style.stroke = "#10b981";
+            speak("休息三十秒。");
+            timerInterval = setInterval(() => {
+                r--; document.getElementById('display-val').innerText = r;
+                if(r <= 3 && r > 0) speak(`${r}`);
+                if(r <= 0) { clearInterval(timerInterval); setCounter++; startSet(); }
+            }, 1000);
+        }
+
+        function completeExercise() {
+            workoutState = 'IDLE';
+            sessionCompletedNames.push(currentEx.name);
+            renderDailyTasks();
+            const todayTasks = schedule[new Date().getDay()].exercises;
+            if (sessionCompletedNames.length === todayTasks.length) saveFinal();
+            else speak(`${currentEx.name}已完成，準備下一項！`);
+        }
+
+        function saveFinal() {
+            const h = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
+            const d = new Date().toLocaleDateString();
+            if(!h.includes(d)) {
+                h.push(d); localStorage.setItem('workoutHistory', JSON.stringify(h));
+                renderCalendar();
+                document.getElementById('reward-desc').innerText = "泰森說：全課程達成！你的身體已經重回巔峰！";
+                document.getElementById('reward-modal').classList.remove('hidden');
+                speak("全任務達成！你是真正的傳奇！");
             }
         }
 
-        function updateBadges() {
-            const count = JSON.parse(localStorage.getItem('workoutHistory') || "[]").length;
-            if (count >= 5) document.getElementById('b5').classList.remove('grayscale', 'opacity-20');
-            if (count >= 10) document.getElementById('b10').classList.remove('grayscale', 'opacity-20');
-            if (count >= 15) document.getElementById('b15').classList.remove('grayscale', 'opacity-20');
+        function renderCalendar() {
+            const now = new Date(); const h = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
+            const container = document.getElementById('calendar-days'); container.innerHTML = '';
+            const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+            const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            for (let i = 0; i < first; i++) container.innerHTML += '<div></div>';
+            for (let d = 1; d <= days; d++) {
+                const ds = new Date(now.getFullYear(), now.getMonth(), d).toLocaleDateString();
+                const isToday = ds === new Date().toLocaleDateString();
+                container.innerHTML += `<div class="calendar-day ${isToday ? 'today-active' : ''} ${h.includes(ds) ? 'done-history' : ''}">${d}</div>`;
+            }
         }
 
-        function showReward(m) {
-            document.getElementById('reward-icon').innerText = m.icon;
-            document.getElementById('reward-title').innerText = "戰魂覺醒！";
-            document.getElementById('reward-desc').innerHTML = m.desc;
-            document.getElementById('reward-modal').classList.remove('hidden');
-            speak(`榮耀時刻！解鎖稱號：${m.title}！`);
-        }
-
+        function toggleVoice() { isVoiceOn = !isVoiceOn; document.getElementById('voice-toggle').innerText = isVoiceOn ? '🔊' : '🔇'; }
+        function toggleGender() { currentGender = currentGender==='male'?'female':'male'; document.getElementById('gender-toggle').innerText = `目前：${currentGender==='male'?'男':'女'}性模式`; sessionCompletedNames = []; initApp(); }
         function closeModal() { document.getElementById('reward-modal').classList.add('hidden'); }
-        
-        function toggleGender() {
-            currentGender = currentGender === 'male' ? 'female' : 'male';
-            document.getElementById('gender-toggle').innerText = `切換至${currentGender === 'male' ? '女' : '男'}性訓練模式`;
-            renderExercises();
-        }
+        function clearHistory() { if(confirm("重置歷史？")) { localStorage.clear(); location.reload(); } }
 
         initApp();
     </script>
