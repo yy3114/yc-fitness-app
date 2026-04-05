@@ -1,0 +1,17 @@
+{
+  "name": "Vitality Pro 55+",
+  "short_name": "活力大師",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e40af",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3843/3843032.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
