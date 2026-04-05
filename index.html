@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>55+ 活力大師：全功能整合版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active-card { border: 3px solid #3b82f6; background-color: #eff6ff; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .workout-day { background-color: #fee2e2; border-radius: 8px; position: relative; }
+        .done-mark::after { content: '✅'; position: absolute; top: -5px; right: -5px; font-size: 10px; }
+        .badge-unlocked { filter: none !important; opacity: 1 !important; transform: scale(1.1); transition: all 0.5s; }
+        .badge-locked { filter: grayscale(1); opacity: 0.2; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen pb-24">
+
+    <div class="max-w-md mx-auto p-4">
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-3xl p-6 mb-6 text-white shadow-xl">
+            <div id="quote-area" class="text-lg font-bold italic mb-1">"身體的投資，回報最誠實！"</div>
+            <div id="milestone-text" class="text-xs text-yellow-300 font-medium">準備好解鎖你的第一個榮耀了嗎？</div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 bg-white p-5 rounded-2xl shadow-sm mb-6 border-t-4 border-yellow-400">
+            <div id="badge-5" class="text-center badge-locked">
+                <div class="text-4xl mb-1">🥉</div>
+                <div class="text-[10px] font-bold text-slate-600">5次：登山客</div>
+            </div>
+            <div id="badge-10" class="text-center badge-locked">
+                <div class="text-4xl mb-1">🥈</div>
+                <div class="text-[10px] font-bold text-slate-600">10次：大力士</div>
+            </div>
+            <div id="badge-15" class="text-center badge-locked">
+                <div class="text-4xl mb-1">🥇</div>
+                <div class="text-[10px] font-bold text-slate-600">15次：傳奇泰森</div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 flex justify-between items-center border-l-4 border-orange-500">
+            <div>
+                <div class="text-sm font-bold text-slate-700">⏰ 運動提醒鬧鐘</div>
+                <div id="reminder-status" class="text-[10px] text-slate-400">尚未設定</div>
+            </div>
+            <div class="flex gap-2">
+                <input type="time" id="reminder-time" class="border rounded px-1 py-1 text-xs">
+                <button onclick="setAlarm()" class="bg-orange-500 text-white text-[10px] px-3 py-1 rounded-lg font-bold">設定</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm mb-6">
+            <h2 id="calendar-title" class="font-black text-slate-800 text-sm mb-4">月曆進度</h2>
+            <div class="calendar-grid text-center text-[10px] font-bold text-slate-400 mb-2">
+                <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+            </div>
+            <div id="calendar-days" class="calendar-grid text-center text-xs font-medium"></div>
+        </div>
+
+        <div class="sticky top-2 z-30 bg-white rounded-3xl shadow-2xl p-6 mb-8 border-b-8 border-blue-600">
+            <div id="timer" class="text-7xl font-mono font-black text-center text-slate-900">45</div>
+            <div id="current-action" class="text-xl font-bold text-center text-blue-700 mt-2">請選動作開始</div>
+            <div class="flex justify-center mt-4">
+                <button onclick="toggleGender()" id="gender-toggle" class="bg-slate-100 px-4 py-1 rounded-full text-xs font-bold text-slate-500">切換至女性模式</button>
+            </div>
+        </div>
+
+        <div class="space-y-4" id="exercise-list"></div>
+
+        <footer class="mt-12 text-center text-slate-300 text-[10px] pb-10">
+            © 55+ 活力整合版 • W2,4,6,Sun 運動日
+        </footer>
+    </div>
+
+    <div id="reward-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-6">
+        <div class="bg-white rounded-3xl p-8 text-center max-w-sm w-full">
+            <div id="reward-icon" class="text-7xl mb-4">🏆</div>
+            <h2 id="reward-title" class="text-2xl font-black text-slate-800 mb-2">解鎖新稱號！</h2>
+            <p id="reward-desc" class="text-slate-600 leading-relaxed mb-6"></p>
+            <button onclick="closeModal()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">收到，我會更強！</button>
+        </div>
+    </div>
+
+    <script>
+        let currentGender = 'male';
+        let countdown;
+        let timeLeft;
+
+        const milestones = {
+            5: { title: "【銅級：登山客】", desc: "太棒了！你現在的體力可以一口氣爬完 **183公尺高** 的象山步道而不氣喘吁吁了！", icon: "🥉" },
+            10: { title: "【銀級：大力士】", desc: "傳奇！你現在的肌力強大到足以單手舉起一頭 **50公斤的小牛**！", icon: "🥈" },
+            15: { title: "【金級：不老泰森】", desc: "巔峰狀態！你現在壯得跟 **拳王泰森** 一樣！不僅能征服玉山，身體年齡重回30歲！", icon: "🥇" }
+        };
+
+        const exercises = {
+            male: [{ name: "伏地挺身", sec: 45, icon: "💪" }, { name: "核心棒式", sec: 60, icon: "🧘" }, { name: "負重深蹲", sec: 45, icon: "🦵" }, { name: "開合跳", sec: 45, icon: "🏃" }],
+            female: [{ name: "跪姿伏地挺身", sec: 45, icon: "🌸" }, { name: "核心棒式", sec: 45, icon: "🧘" }, { name: "扶椅深蹲", sec: 45, icon: "🪑" }, { name: "輕量側步跳", sec: 45, icon: "✨" }]
+        };
+
+        function initApp() {
+            renderCalendar();
+            renderExercises();
+            updateBadges();
+            startAlarmSystem();
+        }
+
+        // --- 鬧鐘系統 ---
+        function setAlarm() {
+            const time = document.getElementById('reminder-time').value;
+            if(!time) return;
+            
+            Notification.requestPermission().then(permission => {
+                if(permission === 'granted') {
+                    localStorage.setItem('workoutAlarm', time);
+                    document.getElementById('reminder-status').innerText = `每日 ${time} 提醒`;
+                    alert("提醒鬧鐘設定成功！");
+                } else {
+                    alert("請開啟瀏覽器通知權限以使用鬧鐘功能。");
+                }
+            });
+        }
+
+        function startAlarmSystem() {
+            const savedTime = localStorage.getItem('workoutAlarm');
+            if(savedTime) document.getElementById('reminder-status').innerText = `每日 ${savedTime} 提醒`;
+
+            setInterval(() => {
+                const now = new Date();
+                const nowTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+                if(nowTime === localStorage.getItem('workoutAlarm') && now.getSeconds() === 0) {
+                    new Notification("🚀 55+ 活力運動時間到了！", {
+                        body: "今天也是充滿力量的一天，點開 App 開始挑戰吧！",
+                        icon: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png"
+                    });
+                }
+            }, 1000);
+        }
+
+        // --- 月曆與記錄 ---
+        function renderCalendar() {
+            const now = new Date();
+            const history = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
+            const daysContainer = document.getElementById('calendar-days');
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+
+            daysContainer.innerHTML = '';
+            for (let i = 0; i < firstDay; i++) daysContainer.innerHTML += '<div></div>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = new Date(now.getFullYear(), now.getMonth(), d).toLocaleDateString();
+                const isWorkoutDay = [0, 2, 4, 6].includes(new Date(now.getFullYear(), now.getMonth(), d).getDay());
+                const isDone = history.includes(dateStr);
+                daysContainer.innerHTML += `<div class="py-2 ${isWorkoutDay ? 'workout-day' : ''} ${isDone ? 'done-mark' : ''}">${d}</div>`;
+            }
+        }
+
+        function updateBadges() {
+            const history = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
+            const count = history.length;
+            [5, 10, 15].forEach(m => {
+                if (count >= m) document.getElementById(`badge-${m}`).classList.add('badge-unlocked');
+            });
+            if (count < 5) document.getElementById('milestone-text').innerText = `再完成 ${5-count} 次，變身登山客！`;
+            else if (count < 10) document.getElementById('milestone-text').innerText = `再完成 ${10-count} 次，挑戰舉起小牛！`;
+            else if (count < 15) document.getElementById('milestone-text').innerText = `再完成 ${15-count} 次，成為傳奇泰森！`;
+        }
+
+        function saveWorkout() {
+            const history = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
+            const today = new Date().toLocaleDateString();
+            if (!history.includes(today)) {
+                history.push(today);
+                localStorage.setItem('workoutHistory', JSON.stringify(history));
+                renderCalendar();
+                updateBadges();
+                if (milestones[history.length]) showReward(history.length);
+                else alert("完成動作！已在月曆打勾 ✅");
+            }
+        }
+
+        // --- 控制邏輯 ---
+        function showReward(count) {
+            const m = milestones[count];
+            document.getElementById('reward-icon').innerText = m.icon;
+            document.getElementById('reward-title').innerText = m.title;
+            document.getElementById('reward-desc').innerHTML = m.desc;
+            document.getElementById('reward-modal').classList.remove('hidden');
+        }
+        function closeModal() { document.getElementById('reward-modal').classList.add('hidden'); }
+
+        function startExercise(name, sec, element) {
+            clearInterval(countdown);
+            document.querySelectorAll('#exercise-list button').forEach(btn => btn.classList.remove('active-card'));
+            element.classList.add('active-card');
+            document.getElementById('current-action').innerText = name;
+            timeLeft = sec;
+            document.getElementById('timer').innerText = timeLeft;
+            countdown = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if (timeLeft <= 0) { clearInterval(countdown); saveWorkout(); }
+            }, 1000);
+        }
+
+        function toggleGender() {
+            currentGender = (currentGender === 'male' ? 'female' : 'male');
+            document.getElementById('gender-toggle').innerText = (currentGender === 'male' ? '切換至女性模式' : '切換至男性模式');
+            renderExercises();
+        }
+
+        function renderExercises() {
+            const list = document.getElementById('exercise-list');
+            list.innerHTML = '';
+            exercises[currentGender].forEach(ex => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center border border-slate-100";
+                btn.onclick = function() { startExercise(ex.name, ex.sec, this); };
+                btn.innerHTML = `<div class="text-left font-bold text-slate-700">${ex.icon} ${ex.name}</div><div class="text-xs text-slate-300">START</div>`;
+                list.appendChild(btn);
+            });
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
+
