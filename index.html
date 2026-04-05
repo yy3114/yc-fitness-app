@@ -3,162 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitality Pro 55+</title>
+    <title>Vitality Pro 55+ | 語音圖解版</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="活力大師">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3843/3843032.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
-        
-        /* 今天的極致強調：橘紅漸層光圈 */
-        .today-active { 
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important; 
-            color: white !important; 
-            font-weight: 900; 
-            border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-            transform: scale(1.1);
-            z-index: 10;
-        }
-
-        .calendar-day { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.3s; }
-        .workout-suggest { background-color: #fee2e2; border-radius: 50%; }
+        .today-active { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important; color: white !important; font-weight: 900; border-radius: 50%; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); transform: scale(1.1); z-index: 10; }
+        .calendar-day { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; position: relative; }
         .done-check::after { content: '✓'; position: absolute; bottom: -2px; right: -2px; background: #10b981; color: white; width: 14px; height: 14px; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; border: 1.5px solid white; font-weight: bold; }
-        
         .progress-ring { transition: stroke-dashoffset 0.3s; transform: rotate(-90deg); transform-origin: 50% 50%; }
-        .active-card { border: 2px solid #3b82f6; background-color: #eff6ff; transform: translateY(-3px); }
-        
-        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .remind-pulse { animation: pulse-red 2s infinite; }
+        .active-card { border: 2px solid #3b82f6; background-color: #eff6ff; }
+        .exercise-gif { width: 100%; height: 160px; object-fit: contain; border-radius: 1.5rem; background: #f1f5f9; }
     </style>
 </head>
 <body class="pb-12">
 
     <div class="max-w-md mx-auto px-6 py-6">
         
-        <header class="mb-6">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h1 class="text-3xl font-black tracking-tighter text-slate-900">Vitality<span class="text-blue-600">Pro</span></h1>
-                    <p id="today-date-text" class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">2026年4月5日</p>
-                </div>
-                <div class="flex -space-x-2">
-                    <div id="b5" class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xl grayscale transition-all">🥉</div>
-                    <div id="b10" class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xl grayscale transition-all">🥈</div>
-                    <div id="b15" class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xl grayscale transition-all">🥇</div>
-                </div>
-            </div>
-            <div class="mt-4 bg-blue-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-200">
-                <p id="quote-text" class="text-sm font-bold italic text-center">"流汗是脂肪在哭泣，加油！"</p>
-            </div>
+        <header class="mb-6 flex justify-between items-center">
+            <h1 class="text-3xl font-black tracking-tighter text-slate-900">Vitality<span class="text-blue-600">Pro</span></h1>
+            <button onclick="toggleVoice()" id="voice-toggle" class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-xl">🔊</button>
         </header>
 
-        <div class="glass rounded-2xl p-4 mb-6 flex justify-between items-center border border-white shadow-sm">
-            <div class="flex items-center gap-2">
-                <span class="text-xl">⏰</span>
-                <span id="alarm-status" class="text-xs font-bold text-slate-500">尚未設定運動提醒</span>
-            </div>
-            <div class="flex gap-2">
-                <input type="time" id="alarm-input" class="text-xs border rounded-lg px-2 py-1 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <button onclick="saveAlarm()" class="bg-slate-900 text-white text-[10px] px-3 py-1 rounded-lg font-black uppercase">設定</button>
-            </div>
-        </div>
-
-        <section class="glass rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 mb-8 border border-white relative">
-            <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-black text-slate-300 uppercase mb-4">
-                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-            </div>
+        <section class="glass rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 mb-8 border border-white">
             <div id="calendar-days" class="grid grid-cols-7 gap-2 text-center text-sm font-bold text-slate-600">
                 </div>
         </section>
 
-        <section class="bg-slate-900 rounded-[3rem] p-8 text-white shadow-2xl relative overflow-hidden mb-10">
-            <div class="absolute -top-10 -left-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl"></div>
-            
-            <div class="relative z-10 flex flex-col items-center">
-                <div class="relative mb-6">
-                    <svg width="180" height="180">
-                        <circle cx="90" cy="90" r="80" stroke="#1e293b" stroke-width="10" fill="transparent" />
-                        <circle id="timer-progress" cx="90" cy="90" r="80" stroke="#3b82f6" stroke-width="10" fill="transparent" stroke-dasharray="502" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring" />
+        <section class="bg-slate-900 rounded-[3rem] p-6 text-white shadow-2xl relative overflow-hidden mb-10">
+            <div class="mb-6 relative">
+                <img id="exercise-img" src="https://cdn-icons-png.flaticon.com/512/3843/3843032.png" class="exercise-gif" alt="動作示範">
+                <div class="absolute bottom-2 right-2 bg-black/50 text-[10px] px-2 py-1 rounded-full">示範圖</div>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <div class="relative mb-4">
+                    <svg width="140" height="140">
+                        <circle cx="70" cy="70" r="62" stroke="#1e293b" stroke-width="8" fill="transparent" />
+                        <circle id="timer-progress" cx="70" cy="70" r="62" stroke="#3b82f6" stroke-width="8" fill="transparent" stroke-dasharray="390" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="timer-val" class="text-7xl font-black italic tracking-tighter">45</span>
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Seconds</span>
+                        <span id="timer-val" class="text-5xl font-black italic">45</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Seconds</span>
                     </div>
                 </div>
 
-                <h3 id="action-title" class="text-2xl font-black mb-3 text-blue-400">點擊開始運動</h3>
-                
-                <div class="bg-slate-800/60 rounded-3xl p-5 w-full border border-slate-700/50">
+                <h3 id="action-title" class="text-xl font-black mb-2 text-blue-400 text-center">選取動作開始訓練</h3>
+                <div class="bg-slate-800/60 rounded-2xl p-4 w-full">
                     <p id="action-guide" class="text-xs text-slate-300 leading-relaxed text-center font-medium">
-                        👋 準備好了嗎？從下方挑選一個訓練動作，計時器將自動開始，專注於每一個發力瞬間！
+                        點擊下方卡片，我會為你語音導引動作。
                     </p>
                 </div>
             </div>
         </section>
 
-        <div class="grid grid-cols-2 gap-4" id="exercise-list">
-            </div>
+        <div class="grid grid-cols-2 gap-4" id="exercise-list"></div>
 
-        <div class="mt-12 flex flex-col items-center gap-4">
-            <button onclick="toggleGender()" class="px-8 py-4 rounded-2xl bg-white shadow-sm border border-slate-100 text-xs font-black text-slate-500 hover:text-blue-600 transition-all active:scale-95 uppercase tracking-widest">
-                切換至女性訓練模式
+        <div class="mt-12 flex flex-col items-center gap-6">
+            <button onclick="toggleGender()" class="px-8 py-4 rounded-2xl bg-white shadow-sm border border-slate-100 text-xs font-black text-slate-500 uppercase tracking-widest">
+                切換模式 (目前:男性)
             </button>
-            <button onclick="clearHistory()" class="text-[10px] text-slate-300 underline font-bold uppercase">重置所有紀錄</button>
+            <div id="badge-row" class="flex gap-4">
+                <div id="b5" class="text-2xl grayscale opacity-30">🥉</div>
+                <div id="b10" class="text-2xl grayscale opacity-30">🥈</div>
+                <div id="b15" class="text-2xl grayscale opacity-30">🥇</div>
+            </div>
         </div>
 
     </div>
 
     <div id="reward-modal" class="fixed inset-0 bg-slate-900/95 z-50 hidden flex items-center justify-center p-8 backdrop-blur-xl">
-        <div class="bg-white rounded-[3.5rem] p-10 text-center max-w-sm w-full shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500"></div>
-            <div id="reward-icon" class="text-9xl mb-6">🏆</div>
-            <h2 id="reward-title" class="text-3xl font-black text-slate-900 mb-2">稱號解鎖</h2>
-            <p id="reward-desc" class="text-slate-500 mb-10 leading-relaxed text-sm font-medium"></p>
-            <button onclick="closeModal()" class="w-full bg-slate-900 text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-transform">繼續我的傳奇之旅</button>
+        <div class="bg-white rounded-[3.5rem] p-10 text-center max-w-sm w-full shadow-2xl">
+            <div id="reward-icon" class="text-8xl mb-6">🏆</div>
+            <h2 id="reward-title" class="text-3xl font-black text-slate-900 mb-2">解鎖稱號</h2>
+            <p id="reward-desc" class="text-slate-500 mb-8 leading-relaxed text-sm font-medium"></p>
+            <button onclick="closeModal()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl">太棒了！</button>
         </div>
     </div>
 
     <script>
         let currentGender = 'male';
         let countdown;
-        let alarmCheck;
-
-        const quotes = [
-            "身體是最好的名牌，流汗是最好的保養！",
-            "55歲才是黃金年代，練起來比年輕人還帥！",
-            "今天的努力，是為了明天不被孩子扶。",
-            "肌肉不會背叛你，它只是在等你叫醒它。",
-            "流汗是脂肪在哭泣，今天也要讓它們大哭一場！"
-        ];
+        let isVoiceOn = true;
 
         const milestones = {
-            5: { title: "【銅級：登山客】", desc: "太棒了！你現在的體力可以一口氣爬完 **183公尺高** 的象山步道而不氣喘吁吁了！", icon: "🥉" },
-            10: { title: "【銀級：大力士】", desc: "傳奇！你現在的肌力強大到足以單手舉起一頭 **50公斤的小牛**！", icon: "🥈" },
-            15: { title: "【金級：不老泰森】", desc: "巔峰狀態！你現在壯得跟 **拳王泰森** 一樣！不僅能征服玉山頂峰，身體年齡重回30歲！", icon: "🥇" }
+            5: { title: "【登山客】", desc: "你現在可以一口氣爬完象山步道而不氣喘吁吁了！", icon: "🥉" },
+            10: { title: "【大力士】", desc: "傳奇！你現在的肌力足以單手舉起一頭小牛！", icon: "🥈" },
+            15: { title: "【傳奇泰森】", desc: "巔峰狀態！你壯得跟泰森一樣，身體重回30歲！", icon: "🥇" }
         };
 
         const exercises = {
             male: [
-                { name: "伏地挺身", sec: 45, icon: "💪", guide: "雙手與肩同寬。向下時胸部貼近地面，撐起時背部保持平直。難度太高可改為扶著桌子。"},
-                { name: "核心棒式", sec: 60, icon: "🧘", guide: "手肘撐地。身體從頭到腳呈一直線，腹部用力收緊，感受核心的震動。"},
-                { name: "負重深蹲", sec: 45, icon: "🦵", guide: "想像背後有椅子坐下。膝蓋不超過腳尖，重心在腳跟，保護膝蓋且鍛鍊大腿。"},
-                { name: "勾腳尖蹬腿", sec: 45, icon: "🛡️", guide: "坐姿下用力勾起腳尖並伸直腿部。這是影片3推薦保護膝蓋的最強動作。"}
+                { name: "伏地挺身", sec: 45, icon: "💪", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXJreW90bWxsbm9hZDNvNHRrMmdsZTR6bjZnd3ZscDR6NHZsayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKpxv42I89mQJLW/giphy.gif", guide: "雙手與肩同寬，胸部貼地後撐起，維持背部平直。" },
+                { name: "核心棒式", sec: 60, icon: "🧘", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZ3Z0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKSj0q942H2e5tS/giphy.gif", guide: "手肘撐地，身體呈一直線，核心用力收緊。" },
+                { name: "負重深蹲", sec: 45, icon: "🦵", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZ3Z0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKv6eSqcE2C6Iyk/giphy.gif", guide: "屁股後坐如坐椅子，膝蓋不超過腳尖，背挺直。" },
+                { name: "勾腳尖蹬腿", sec: 45, icon: "🛡️", img: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png", guide: "坐姿下用力勾起腳尖並伸直腿部，保護膝蓋。" }
             ],
             female: [
-                { name: "跪姿伏地", sec: 45, icon: "🌸", guide: "膝蓋著地支撐。手臂緩慢屈伸，專注於胸部與手臂後側的緊實感。"},
-                { name: "核心棒式", sec: 45, icon: "🧘", guide: "手肘支撐。專注縮小腹，這對強化盆底肌與預防漏尿非常有幫助。"},
-                { name: "扶椅深蹲", sec: 45, icon: "🪑", guide: "扶住椅背確保平衡。緩慢下蹲至大腿與地面平行，強化骨密度預防鬆軟。"},
-                { name: "勾腳尖蹬腿", sec: 60, icon: "🛡️", guide: "坐著也能練。勾起腳尖伸直，強化股四頭肌，讓上下樓梯更輕鬆有力。"}
+                { name: "跪姿伏地", sec: 45, icon: "🌸", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXJreW90bWxsbm9hZDNvNHRrMmdsZTR6bjZnd3ZscDR6NHZsayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKpxv42I89mQJLW/giphy.gif", guide: "膝蓋著地支撐，手臂慢下慢上，強化胸部肌力。" },
+                { name: "核心棒式", sec: 45, icon: "🧘", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZ3Z0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKSj0q942H2e5tS/giphy.gif", guide: "專注縮小腹，強化盆底肌，維持核心穩定。" },
+                { name: "扶椅深蹲", sec: 45, icon: "🪑", img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZ3Z0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKv6eSqcE2C6Iyk/giphy.gif", guide: "扶住椅背，緩慢下蹲再站起，強化下肢骨密度。" },
+                { name: "勾腳尖蹬腿", sec: 60, icon: "🛡️", img: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png", guide: "勾起腳尖伸直腿，預防膝退化，讓走路更有力。" }
             ]
         };
 
@@ -166,37 +119,39 @@
             renderCalendar();
             renderExercises();
             updateBadges();
-            updateQuote();
-            startAlarmSystem();
         }
 
-        function updateQuote() {
-            const rand = Math.floor(Math.random() * quotes.length);
-            document.getElementById('quote-text').innerText = `"${quotes[rand]}"`;
+        // --- 語音功能 ---
+        function speak(text) {
+            if (!isVoiceOn) return;
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'zh-TW';
+            msg.rate = 0.9;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function toggleVoice() {
+            isVoiceOn = !isVoiceOn;
+            document.getElementById('voice-toggle').innerText = isVoiceOn ? '🔊' : '🔇';
         }
 
         function renderCalendar() {
             const now = new Date();
             const history = JSON.parse(localStorage.getItem('workoutHistory') || "[]");
             const container = document.getElementById('calendar-days');
+            const todayStr = now.toLocaleDateString();
+            
+            container.innerHTML = '';
             const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
             const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-            const todayStr = now.toLocaleDateString();
 
-            container.innerHTML = '';
             for (let i = 0; i < firstDay; i++) container.innerHTML += '<div></div>';
-            
             for (let d = 1; d <= daysInMonth; d++) {
-                const dateObj = new Date(now.getFullYear(), now.getMonth(), d);
-                const dateStr = dateObj.toLocaleDateString();
-                const isWorkoutDay = [0, 2, 4, 6].includes(dateObj.getDay());
+                const dateStr = new Date(now.getFullYear(), now.getMonth(), d).toLocaleDateString();
                 const isToday = dateStr === todayStr;
                 const isDone = history.includes(dateStr);
-                
-                const dayEl = document.createElement('div');
-                dayEl.className = `calendar-day ${isWorkoutDay ? 'workout-suggest' : ''} ${isToday ? 'today-active' : ''} ${isDone ? 'done-check' : ''}`;
-                dayEl.innerText = d;
-                container.appendChild(dayEl);
+                container.innerHTML += `<div class="calendar-day ${isToday ? 'today-active' : ''} ${isDone ? 'done-check' : ''}">${d}</div>`;
             }
         }
 
@@ -205,13 +160,9 @@
             list.innerHTML = '';
             exercises[currentGender].forEach(ex => {
                 const card = document.createElement('button');
-                card.className = "bg-white p-6 rounded-[2.2rem] shadow-sm border border-slate-100 flex flex-col items-center transition-all active:scale-90";
+                card.className = "bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center transition-all active:scale-95";
                 card.onclick = () => startTimer(ex, card);
-                card.innerHTML = `
-                    <div class="text-4xl mb-3">${ex.icon}</div>
-                    <div class="text-sm font-black text-slate-800">${ex.name}</div>
-                    <div class="text-[10px] font-bold text-blue-500 mt-1 uppercase tracking-tighter">${ex.sec}s Training</div>
-                `;
+                card.innerHTML = `<div class="text-3xl mb-2">${ex.icon}</div><div class="text-sm font-black text-slate-800">${ex.name}</div>`;
                 list.appendChild(card);
             });
         }
@@ -223,24 +174,23 @@
 
             document.getElementById('action-title').innerText = ex.name;
             document.getElementById('action-guide').innerText = ex.guide;
+            document.getElementById('exercise-img').src = ex.img;
+
+            speak(`開始練習 ${ex.name}。提示：${ex.guide}`);
 
             let left = ex.sec;
             const progress = document.getElementById('timer-progress');
-            const valEl = document.getElementById('timer-val');
             
-            valEl.innerText = left;
-            progress.style.strokeDashoffset = 0;
-
             countdown = setInterval(() => {
                 left--;
-                valEl.innerText = left;
-                const offset = 502 - (left / ex.sec) * 502;
-                progress.style.strokeDashoffset = offset;
+                document.getElementById('timer-val').innerText = left;
+                progress.style.strokeDashoffset = 390 - (left / ex.sec) * 390;
 
+                if (left === 3) speak("三、二、一");
                 if (left <= 0) {
                     clearInterval(countdown);
                     saveRecord();
-                    valEl.innerText = "DONE";
+                    speak("完成了！太棒了，請休息一下。");
                 }
             }, 1000);
         }
@@ -260,9 +210,9 @@
 
         function updateBadges() {
             const count = JSON.parse(localStorage.getItem('workoutHistory') || "[]").length;
-            if (count >= 5) document.getElementById('b5').classList.remove('grayscale');
-            if (count >= 10) document.getElementById('b10').classList.remove('grayscale');
-            if (count >= 15) document.getElementById('b15').classList.remove('grayscale');
+            if (count >= 5) document.getElementById('b5').classList.remove('grayscale', 'opacity-30');
+            if (count >= 10) document.getElementById('b10').classList.remove('grayscale', 'opacity-30');
+            if (count >= 15) document.getElementById('b15').classList.remove('grayscale', 'opacity-30');
         }
 
         function showReward(m) {
@@ -270,52 +220,14 @@
             document.getElementById('reward-title').innerText = m.title;
             document.getElementById('reward-desc').innerHTML = m.desc;
             document.getElementById('reward-modal').classList.remove('hidden');
+            speak(`恭喜！你獲得了新稱號：${m.title}`);
         }
 
         function closeModal() { document.getElementById('reward-modal').classList.add('hidden'); }
-
         function toggleGender() {
             currentGender = currentGender === 'male' ? 'female' : 'male';
-            document.querySelector('button[onclick="toggleGender()"]').innerText = `切換模式：目前為${currentGender === 'male' ? '男' : '女'}性`;
-            initApp();
-        }
-
-        // --- 鬧鐘提醒邏輯 ---
-        function saveAlarm() {
-            const time = document.getElementById('alarm-input').value;
-            if(!time) return;
-            Notification.requestPermission().then(p => {
-                if(p === 'granted') {
-                    localStorage.setItem('vitalityAlarm', time);
-                    document.getElementById('alarm-status').innerText = `已設定每日 ${time} 提醒`;
-                    alert("提醒設定成功！");
-                } else {
-                    alert("請開啟瀏覽器通知權限");
-                }
-            });
-        }
-
-        function startAlarmSystem() {
-            const saved = localStorage.getItem('vitalityAlarm');
-            if(saved) document.getElementById('alarm-status').innerText = `已設定每日 ${saved} 提醒`;
-            
-            alarmCheck = setInterval(() => {
-                const now = new Date();
-                const current = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-                if(current === localStorage.getItem('vitalityAlarm') && now.getSeconds() === 0) {
-                    new Notification("🚀 Vitality Pro: 運動時間到！", {
-                        body: "55歲的你依然強大，泰森都在等你開始！",
-                        icon: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png"
-                    });
-                }
-            }, 1000);
-        }
-
-        function clearHistory() {
-            if(confirm("確定要重置所有訓練記錄與獎章嗎？")) {
-                localStorage.clear();
-                location.reload();
-            }
+            document.querySelector('button[onclick="toggleGender()"]').innerText = `切換模式 (目前:${currentGender === 'male' ? '男' : '女'}性)`;
+            renderExercises();
         }
 
         initApp();
