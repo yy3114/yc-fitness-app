@@ -17,7 +17,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 今天的熱血光圈 */
+        /* 今天的熱血光圈：橘紅漸層 */
         .today-active { 
             background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important; 
             color: white !important; 
@@ -35,7 +35,7 @@
         .task-done { border: 2px solid #10b981 !important; background-color: rgba(16, 185, 129, 0.1) !important; opacity: 0.6; }
         .task-done span { color: #10b981 !important; }
         
-        /* 自定義節奏滑桿 */
+        /* 自定義節奏滑桿樣式 */
         input[type=range] { -webkit-appearance: none; background: #1e293b; height: 6px; border-radius: 5px; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #ef4444; cursor: pointer; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
 
@@ -63,7 +63,7 @@
                 
                 <div class="glass p-4 rounded-2xl border border-slate-700">
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">⚡️ 動作節奏控制</span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">⚡️ 動作數數節奏 (秒/次)</span>
                         <span id="pacing-val" class="text-sm font-black text-red-500">2.0s</span>
                     </div>
                     <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" class="w-full" oninput="updatePacing(this.value)">
@@ -73,7 +73,7 @@
 
         <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-4 mb-6">
             <div class="flex justify-between text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-widest">
-                <span id="task-summary">課表載入中...</span>
+                <span id="task-summary">今日課程載入中...</span>
                 <span id="task-percent">0%</span>
             </div>
             <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
@@ -102,12 +102,12 @@
                     </div>
                 </div>
 
-                <h3 id="action-title" class="text-xl font-black mb-1 text-red-500 uppercase">選取動作</h3>
-                <div id="set-info" class="text-[10px] font-bold text-slate-500 mb-4 tracking-widest uppercase italic">3 Sets • 12 Reps</div>
+                <h3 id="action-title" class="text-xl font-black mb-1 text-red-500 uppercase">請選擇動作</h3>
+                <div id="set-info" class="text-[10px] font-bold text-slate-500 mb-4 tracking-widest uppercase italic">3 Sets • 12 Reps per set</div>
                 
                 <div class="bg-slate-900/80 rounded-2xl p-4 w-full border border-slate-700">
                     <p id="action-guide" class="text-xs text-slate-400 leading-relaxed font-medium italic">
-                        「每一組都要全力以赴，泰森在看著你！」
+                        「速度慢才是肌肉增長的關鍵，泰森在看著你！」
                     </p>
                 </div>
             </div>
@@ -119,17 +119,18 @@
             <div class="text-3xl">🥉</div><div class="text-3xl">🥈</div><div class="text-3xl">🥇</div>
         </div>
         
-        <center class="mt-8">
-            <button onclick="clearHistory()" class="text-[9px] text-slate-600 underline uppercase tracking-widest font-bold">重置 VitalityPro 數據</button>
-        </center>
+        <footer class="mt-12 text-center">
+            <button onclick="clearHistory()" class="text-[9px] text-slate-600 underline uppercase tracking-widest font-bold">Reset VitalityPro Data</button>
+            <p class="text-[8px] text-slate-700 mt-4 uppercase">VitalityPro ∙ Crafted by ycy ∙ 2026</p>
+        </footer>
     </div>
 
     <div id="reward-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center p-8 backdrop-blur-xl">
         <div class="bg-slate-900 border border-red-500/30 rounded-[3.5rem] p-10 text-center max-w-sm w-full shadow-2xl">
             <div class="text-8xl mb-6">🏆</div>
-            <h2 class="text-2xl font-black text-white mb-2 italic tracking-tighter">全任務達成！</h2>
-            <p id="reward-desc" class="text-slate-400 mb-8 leading-relaxed text-sm"></p>
-            <button onclick="closeModal()" class="w-full bg-red-600 text-white font-black py-4 rounded-2xl shadow-xl">繼續變強</button>
+            <h2 class="text-2xl font-black text-white mb-2 italic tracking-tighter">今日任務全部達成！</h2>
+            <p id="reward-desc" class="text-slate-400 mb-8 leading-relaxed text-sm font-medium"></p>
+            <button onclick="closeModal()" class="w-full bg-red-600 text-white font-black py-4 rounded-2xl shadow-xl active:scale-95">繼續強大</button>
         </div>
     </div>
 
@@ -144,6 +145,7 @@
         let sessionCompletedNames = [];
         let pacingSeconds = 2.0;
 
+        // --- 核心科學課表 (W2, 4, 6, Sun) ---
         const schedule = {
             2: { name: "週二：胸背力量日", exercises: ["伏地挺身", "彈力繩划船", "彈力繩胸推"] },
             4: { name: "週四：下肢護膝日", exercises: ["負重深蹲", "彈力繩死硬舉", "勾腳尖蹬腿"] },
@@ -152,22 +154,22 @@
         };
 
         const allExercises = {
-            "伏地挺身": { intro: "伏地挺身。雙手撐地，三組十二下。推起來！", type: "REP", goalSet: 3, goalRep: 12, img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXJreW90bWxsbm9hZDNvNHRrMmdsZTR6bjZnd3ZscDR6NHZsayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKpxv42I89mQJLW/giphy.gif" },
-            "核心棒式": { intro: "核心棒式。身體呈直線撐住。三組四十秒。撐住！", type: "TIME", goalSet: 3, goalTime: 40, img: "https://media.giphy.com/media/3o7TKSj0q942H2e5tS/giphy.gif" },
-            "負重深蹲": { intro: "負重深蹲。屁股慢慢後坐。三組十二下。保護膝蓋。", type: "REP", goalSet: 3, goalRep: 12, img: "https://media.giphy.com/media/3o7TKv6eSqcE2C6Iyk/giphy.gif" },
-            "開合跳": { intro: "開合跳。輕盈跳動。三組三十秒。燃燒吧！", type: "TIME", goalSet: 3, goalTime: 30, img: "https://media.giphy.com/media/3o7TKpxv42I89mQJLW/giphy.gif" },
-            "彈力繩划船": { intro: "彈力繩划船。背部夾緊往後拉。三組十二下。", type: "REP", goalSet: 3, goalRep: 12, img: "https://cdn-icons-png.flaticon.com/512/3843/3843015.png" },
-            "彈力繩死硬舉": { intro: "彈力繩死硬舉。慢速上拉。三組十二下。", type: "REP", goalSet: 3, goalRep: 12, img: "https://cdn-icons-png.flaticon.com/512/3843/3843022.png" },
-            "二頭/三頭組合": { intro: "手臂強化。慢速控制。三組十二下。", type: "REP", goalSet: 3, goalRep: 12, img: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png" },
-            "勾腳尖蹬腿": { intro: "勾腳尖蹬腿。緩慢伸直。三組十五下。保護膝蓋。", type: "REP", goalSet: 3, goalRep: 15, img: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png" },
-            "彈力繩胸推": { intro: "彈力繩胸推。穩定前推。三組十二下。", type: "REP", goalSet: 3, goalRep: 12, img: "https://cdn-icons-png.flaticon.com/512/3843/3843015.png" }
+            "伏地挺身": { intro: "伏地挺身。三組十二下。每一推都要推向極限！", type: "REP", goalSet: 3, goalRep: 12, img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXJreW90bWxsbm9hZDNvNHRrMmdsZTR6bjZnd3ZscDR6NHZsayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKpxv42I89mQJLW/giphy.gif" },
+            "核心棒式": { intro: "核心棒式。三組四十秒。鎖死核心，不准動！", type: "TIME", goalSet: 3, goalTime: 40, img: "https://media.giphy.com/media/3o7TKSj0q942H2e5tS/giphy.gif" },
+            "負重深蹲": { intro: "負重深蹲。三組十二下。蹲下去，再像彈簧一樣站起！", type: "REP", goalSet: 3, goalRep: 12, img: "https://media.giphy.com/media/3o7TKv6eSqcE2C6Iyk/giphy.gif" },
+            "開合跳": { intro: "開合跳。三組三十秒。讓靈魂跟著跳動！", type: "TIME", goalSet: 3, goalTime: 30, img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZ3Z0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0Z3p0JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKpxv42I89mQJLW/giphy.gif" },
+            "彈力繩划船": { intro: "彈力繩划船。三組十二下。背肌夾緊，拉動命運！", type: "REP", goalSet: 3, goalRep: 12, img: "https://cdn-icons-png.flaticon.com/512/3843/3843015.png" },
+            "彈力繩死硬舉": { intro: "彈力繩死硬舉。三組十二下。腳踩穩，向上站！", type: "REP", goalSet: 3, goalRep: 12, img: "https://cdn-icons-png.flaticon.com/512/3843/3843022.png" },
+            "二頭/三頭組合": { intro: "手臂強化。三組十二下。打造鋼鐵雙臂！", type: "REP", goalSet: 3, goalRep: 12, img: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png" },
+            "勾腳尖蹬腿": { intro: "勾腳尖蹬腿。三組十五下。守護膝蓋的最後防線！", type: "REP", goalSet: 3, goalRep: 15, img: "https://cdn-icons-png.flaticon.com/512/3843/3843032.png" },
+            "彈力繩胸推": { intro: "彈力繩胸推。三組十二下。穩定推進，撕裂胸肌！", type: "REP", goalSet: 3, goalRep: 12, img: "https://cdn-icons-png.flaticon.com/512/3843/3843015.png" }
         };
 
         function speak(t, callback) {
             if (!isVoiceOn) { if(callback) callback(); return; }
             window.speechSynthesis.cancel();
             const m = new SpeechSynthesisUtterance(t);
-            m.lang = 'zh-TW'; m.rate = 1.0;
+            m.lang = 'zh-TW'; m.rate = 1.0; m.pitch = 1.1;
             if(callback) m.onend = callback;
             window.speechSynthesis.speak(m);
         }
@@ -175,13 +177,13 @@
         function updatePacing(val) {
             pacingSeconds = parseFloat(val);
             document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s";
-            localStorage.setItem('vPacing', pacingSeconds);
+            localStorage.setItem('vp_pacing', pacingSeconds);
         }
 
         function initApp() {
-            const saved = localStorage.getItem('vPacing');
-            if(saved) {
-                pacingSeconds = parseFloat(saved);
+            const savedP = localStorage.getItem('vp_pacing');
+            if(savedP) {
+                pacingSeconds = parseFloat(savedP);
                 document.getElementById('pacing-slider').value = pacingSeconds;
                 document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s";
             }
@@ -192,7 +194,7 @@
 
         function renderDailyTasks() {
             const today = new Date().getDay();
-            const taskInfo = schedule[today] || { name: "今日修復休息日", exercises: [] };
+            const taskInfo = schedule[today] || { name: "今日休息修復日", exercises: [] };
             document.getElementById('task-summary').innerText = taskInfo.name;
             const listEl = document.getElementById('daily-task-list');
             listEl.innerHTML = '';
@@ -230,7 +232,7 @@
             repCounter = 0;
             document.getElementById('display-label').innerText = `SET ${setCounter}`;
             document.getElementById('timer-progress').style.stroke = "#ef4444";
-            speak(`第 ${setCounter} 組，開始！`, () => {
+            speak(`第 ${setCounter} 組，泰森看著你，開始！`, () => {
                 if(currentEx.type === 'REP') runRepCycle();
                 else runTimeCycle();
             });
@@ -240,7 +242,6 @@
             if (repCounter < currentEx.goalRep) {
                 repCounter++;
                 document.getElementById('display-val').innerText = repCounter;
-                document.getElementById('set-info').innerText = `Set ${setCounter}/${currentEx.goalSet} • Rep ${repCounter}/${currentEx.goalRep}`;
                 speak(`${repCounter}`);
                 
                 timerInterval = setTimeout(() => {
@@ -258,8 +259,12 @@
                 left--;
                 document.getElementById('display-val').innerText = left;
                 document.getElementById('timer-progress').style.strokeDashoffset = 390 - (left/currentEx.goalTime)*390;
-                if(left <= 3 && left > 0) speak(`${left}`);
-                if(left <= 0) { clearInterval(timerInterval); finishSet(); }
+                if(left === 3) { document.getElementById('display-val').classList.add('shaking'); speak("三、二、一！撐住！"); }
+                if(left <= 0) { 
+                    clearInterval(timerInterval); 
+                    document.getElementById('display-val').classList.remove('shaking');
+                    finishSet(); 
+                }
             }, 1000);
         }
 
@@ -273,7 +278,7 @@
             let r = 30;
             document.getElementById('display-label').innerText = "REST";
             document.getElementById('timer-progress').style.stroke = "#10b981";
-            speak("休息三十秒。泰森提醒你：喝口水。");
+            speak("漂亮！休息三十秒，深呼吸，喝口水。");
             timerInterval = setInterval(() => {
                 r--; document.getElementById('display-val').innerText = r;
                 if(r <= 3 && r > 0) speak(`${r}`);
@@ -288,7 +293,7 @@
             const todayTasks = (schedule[new Date().getDay()] || {exercises:[]}).exercises;
             if (sessionCompletedNames.length === todayTasks.length) saveFinal();
             else { 
-                speak(`${currentEx.name}已完成，準備下一項！`); 
+                speak(`${currentEx.name}已擊破，下一項任務等著你！`); 
                 document.getElementById('display-val').innerText = "✅"; 
             }
         }
@@ -299,9 +304,9 @@
             if(!h.includes(d)) {
                 h.push(d); localStorage.setItem('workoutHistory', JSON.stringify(h));
                 renderCalendar(); updateBadges();
-                document.getElementById('reward-desc').innerText = "泰森說：你是真正的強者！今日全課程達成！";
+                document.getElementById('reward-desc').innerText = "泰森說：你是真正的鬥士！今日課程圓滿達成！";
                 document.getElementById('reward-modal').classList.remove('hidden');
-                speak("全課程任務達成！你是真正的傳奇！");
+                speak("全任務達成！你是真正的傳奇！");
             }
         }
 
@@ -324,9 +329,9 @@
         }
 
         function toggleVoice() { isVoiceOn = !isVoiceOn; document.getElementById('voice-toggle').innerText = isVoiceOn ? '🔊' : '🔇'; }
-        function toggleGender() { currentGender = currentGender==='male'?'female':'male'; document.getElementById('gender-toggle').innerText = `目前：${currentGender==='male'?'男':'女'}性模式`; sessionCompletedNames = []; initApp(); }
+        function toggleGender() { currentGender = currentGender==='male'?'female':'male'; document.getElementById('gender-toggle').innerText = `切換模式 (目前:${currentGender==='male'?'男':'女'}性)`; sessionCompletedNames = []; initApp(); }
         function closeModal() { document.getElementById('reward-modal').classList.add('hidden'); }
-        function clearHistory() { if(confirm("重置所有歷史紀錄？")) { localStorage.clear(); location.reload(); } }
+        function clearHistory() { if(confirm("確定清除 VitalityPro 所有歷史紀錄嗎？")) { localStorage.clear(); location.reload(); } }
 
         initApp();
     </script>
