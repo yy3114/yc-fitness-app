@@ -14,7 +14,7 @@
         .bg-main { background-color: var(--main); }
         .text-main { color: var(--main); }
         
-        .task-card { border: 2px solid transparent; transition: all 0.4s; background: rgba(30, 41, 59, 0.4); }
+        .task-card { border: 2px solid transparent; transition: all 0.4s ease; background: rgba(30, 41, 59, 0.4); }
         .task-card.active-now { border-color: var(--main); box-shadow: 0 0 25px var(--main); transform: scale(1.02); }
         .task-card.completed { border-color: #10b981 !important; background: rgba(16, 185, 129, 0.15) !important; opacity: 0.8; }
         
@@ -27,7 +27,7 @@
         .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 14px; }
         .done-history::after { content: '⭐'; position: absolute; bottom: -2px; right: -2px; font-size: 10px; color: #f59e0b; }
         
-        .day-btn { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; color: #475569; transition: 0.2s; }
+        .day-btn { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; transition: 0.2s; color: #475569; }
         .day-btn.active { background-color: var(--main); color: white; border-color: var(--main); }
         
         #entry-screen { position: fixed; inset: 0; z-index: 2000; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -58,7 +58,7 @@
 
         <div class="glass p-6 rounded-[2.5rem] mb-10 border border-slate-700 text-center">
             <h4 class="text-sm font-black text-main uppercase tracking-widest mb-6 italic">設定每週特訓日 (最多4天)</h4>
-            <div class="flex justify-between mb-8">
+            <div class="flex justify-between mb-8" id="picker-row">
                 <button class="day-btn" data-day="1" onclick="selectDay(1)">一</button>
                 <button class="day-btn" data-day="2" onclick="selectDay(2)">二</button>
                 <button class="day-btn" data-day="3" onclick="selectDay(3)">三</button>
@@ -68,14 +68,14 @@
                 <button class="day-btn" data-day="0" onclick="selectDay(0)">日</button>
             </div>
             <div class="flex gap-4">
-                <button onclick="confirmSchedule()" class="flex-1 bg-main py-4 rounded-2xl font-black text-xs text-white">確定設定</button>
-                <button onclick="resetSchedule()" class="flex-1 bg-slate-800 py-4 rounded-2xl font-black text-xs text-slate-400">重設</button>
+                <button onclick="confirmSchedule()" class="flex-1 bg-main py-4 rounded-2xl font-black text-sm text-white shadow-lg">確定設定</button>
+                <button onclick="resetSchedule()" class="flex-1 bg-slate-800 py-4 rounded-2xl font-black text-sm text-slate-400">重設</button>
             </div>
         </div>
 
         <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 mb-8 text-center">
             <h4 class="text-sm font-black text-main mb-2 uppercase tracking-widest">今天的目標</h4>
-            <p id="daily-goal-text" class="text-lg text-slate-200 font-bold italic">等待排程設定...</p>
+            <p id="daily-goal-text" class="text-lg text-slate-200 font-bold italic">請設定特訓日</p>
         </div>
 
         <section class="glass rounded-[2rem] p-5 shadow-2xl mb-12 text-center">
@@ -83,10 +83,11 @@
         </section>
 
         <section class="bg-slate-800/30 rounded-[3.5rem] p-10 text-white shadow-2xl relative border border-slate-700/50 mb-12 text-center">
-            <p class="text-base font-black text-main uppercase tracking-widest mb-6"><span class="coach-p">你</span>今天的教練</p>
+            <p class="text-3xl font-black text-main uppercase tracking-widest mb-8"><span class="coach-p">你</span>今天的教練</p>
+            
             <div class="flex justify-center mb-8">
-                <div class="w-32 h-32 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl">
-                    <img id="hero-img" src="https://i.postimg.cc/02dzjW8X/1775410232847.png" class="w-full h-full object-cover">
+                <div class="w-40 h-40 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl">
+                    <img id="hero-img" src="https://i.postimg.cc/nh2CXY5r/1775410232847.png" class="w-full h-full object-cover">
                 </div>
             </div>
             <div class="flex flex-col items-center">
@@ -94,12 +95,12 @@
                     <svg width="160" height="160"><circle cx="80" cy="80" r="74" stroke="#1e293b" stroke-width="8" fill="transparent" /><circle id="timer-progress" cx="80" cy="80" r="74" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="465" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring text-main" /></svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="display-val" class="text-7xl font-black italic tracking-tighter">--</span></div>
                 </div>
-                <h3 id="action-title" class="text-3xl font-black mb-2 text-white uppercase italic tracking-tighter">Ready?</h3>
-                <p id="action-coach-name" class="text-lg text-slate-400 italic">等待任務中...</p>
+                <h3 id="action-title" class="text-3xl font-black mb-2 text-white uppercase italic tracking-widest">Ready?</h3>
+                <p id="action-coach-name" class="text-lg text-slate-400 italic">選取下方動作開始任務</p>
             </div>
         </section>
 
-        <div id="daily-task-list" class="space-y-10 mb-12"></div>
+        <div id="daily-task-list" class="space-y-10 mb-16"></div>
 
         <div class="glass p-8 rounded-[2.5rem] border border-slate-700 mb-16">
             <div class="flex justify-between items-center mb-4">
@@ -107,6 +108,7 @@
                 <span id="pacing-val" class="text-2xl font-black text-main tracking-tighter">2.0s</span>
             </div>
             <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" oninput="updatePacing(this.value)">
+            <p class="text-[10px] text-slate-500 mt-3 text-center uppercase font-bold tracking-widest">向右滑動放慢「數下」的速度</p>
         </div>
 
         <footer class="text-center py-12 border-t border-slate-800">
@@ -124,7 +126,6 @@
     </div>
 
     <script>
-        // --- 核心資料 ---
         let currentGender = 'male';
         let isVoiceOn = true;
         let activeExName = null;
@@ -133,38 +134,38 @@
         let repCounter = 0;
         let timerId = null;
         let pacingSeconds = 2.0;
-        let scheduleDays = JSON.parse(localStorage.getItem('vSch_ycy_strict_vFinal')) || [];
+        let scheduleDays = JSON.parse(localStorage.getItem('vSch_ycy_v2026_FINAL_STRICT')) || [];
         let completedActions = [];
         let unlockedActions = []; 
 
         const heroes = {
             male: [
-                { name: "美國隊長", img: "https://i.postimg.cc/02dzjW8X/1775410232847.png", msg: "我能跟你耗上一整天！動起來！" },
-                { name: "鋼鐵人", img: "https://i.postimg.cc/2SbgTJVF/Screenshot-20260406-012721-Chrome.jpg", msg: "我愛你三千次，給我推起來！" },
-                { name: "雷神索爾", img: "https://i.postimg.cc/ZKgM9cV8/1000046561.jpg", msg: "感受力量！你值得擁有雷神之槌！" },
-                { name: "蜘蛛人", img: "https://i.postimg.cc/zDSps208/2f97an638ty71.png", msg: "能力越大責任越大！加油戰友！" },
-                { name: "浩克", img: "https://i.postimg.cc/FRxcB8mT/e034a1aa5c1f786a5be9db40149ffe63.jpg", msg: "浩克！打碎脂肪！浩克喜歡你！" }
+                { name: "美國隊長", img: "https://i.postimg.cc/nh2CXY5r/1775410232847.png", msg: "我能跟你耗上一整天！動起來！" },
+                { name: "鋼鐵人", img: "https://i.postimg.cc/qv1vJBh7/Screenshot-20260406-012721-Chrome.jpg", msg: "我愛你三千次，給我推起來！" },
+                { name: "雷神索爾", img: "https://i.postimg.cc/fysN71tj/1000046561.jpg", msg: "感受力量！你值得擁有雷神之槌！" },
+                { name: "蜘蛛人", img: "https://i.postimg.cc/Bb4rPDkN/2f97an638ty71.png", msg: "能力越大責任越大！加油戰友！" },
+                { name: "浩克", img: "https://i.postimg.cc/mDGqKCLW/e034a1aa5c1f786a5be9db40149ffe63.jpg", msg: "浩克！打碎脂肪！浩克喜歡你！" }
             ],
             female: [
-                { name: "黑寡婦", img: "https://i.postimg.cc/TYb22mLS/580b57fbd9996e24bc43c01f.png", msg: "肌肉是永恆的，開始特訓！" },
-                { name: "緋紅女巫", img: "https://i.postimg.cc/qBb6687z/pngtree-scarlet-witch-1980s-workout-outfit-comic-book-panel-white-background-png-image-17124607.jpg", msg: "妳可以掌控這股能量！推起來！" },
-                { name: "驚奇隊長", img: "https://i.postimg.cc/Pr1L3043/162461510278.png", msg: "更高更快更強！超越妳的極限！" },
-                { name: "舒莉", img: "https://i.postimg.cc/tCDb45CR/1775434457885.png", msg: "瓦干達萬歲！用科學強化妳！" },
-                { name: "葛摩菈", img: "https://i.postimg.cc/tT0QMvDh/1775434603033.png", msg: "妳是宇宙最強的戰士。不准軟弱！" }
+                { name: "黑寡婦", img: "https://i.postimg.cc/15TvLwBb/580b57fbd9996e24bc43c01f.png", msg: "肌肉是永恆的，開始特訓！" },
+                { name: "緋紅女巫", img: "https://i.postimg.cc/5NZmP1NL/pngtree-scarlet-witch-1980s-workout-outfit-comic-book-panel-white-background-png-image-17124607.jpg", msg: "妳可以掌控這股能量！推起來！" },
+                { name: "驚奇隊長", img: "https://i.postimg.cc/nr9D7jmG/162461510278.png", msg: "更高更快更強！超越妳的極限！" },
+                { name: "舒莉", img: "https://i.postimg.cc/s229x2Tk/1775434457885.png", msg: "瓦干達萬歲！用科學的力量強化妳！" },
+                { name: "葛摩菈", img: "https://i.postimg.cc/B696yYPD/1775434603033.png", msg: "妳是宇宙最強的戰士。不准軟弱！" }
             ]
         };
 
         const configMap = () => {
             const isM = currentGender === 'male';
             return {
-                "伏地挺身": { sets: 3, reps: isM?12:8, type: "reps", tips: "與肩同寬，推起時吐氣，背部保持平直。" },
-                "負重深蹲": { sets: 3, reps: isM?15:12, type: "reps", tips: "重心在腳跟，屁股像坐椅子，膝蓋不超尖。" },
-                "核心棒式": { sets: 3, reps: 60, type: "secs", tips: "全身呈一線，腹部收緊，不要憋氣。" }, // 修正：60秒
-                "彈力繩划船": { sets: 3, reps: isM?12:10, type: "reps", tips: "挺胸夾緊背部，將帶子拉向後側。" },
-                "彈力繩胸推": { sets: 3, reps: isM?12:10, type: "reps", tips: "雙手前推感受胸肌收縮，慢放快推。" },
-                "勾腳尖蹬腿": { sets: 3, reps: 15, type: "reps", tips: "用力勾起腳尖，腿部完全伸直，保護膝蓋。" },
-                "二頭/三頭組合": { sets: 3, reps: isM?12:10, type: "reps", tips: "手肘固定不動，感受手臂肌肉緩慢收縮。" },
-                "開合跳": { sets: 3, reps: 40, type: "secs", tips: "輕盈跳躍，利用腳尖緩衝，雙手過頭。" }
+                "伏地挺身": { sets: 3, reps: isM?12:8, unit: "下", tips: "與肩同寬，推起時吐氣，背部保持平直。" },
+                "負重深蹲": { sets: 3, reps: isM?15:12, unit: "下", tips: "重心在腳跟，屁股像坐椅子，膝蓋不超尖。" },
+                "核心棒式": { sets: 3, reps: 60, unit: "秒", tips: "全身呈一線，腹部收緊，不要憋氣。" }, 
+                "彈力繩划船": { sets: 3, reps: isM?12:10, unit: "下", tips: "挺胸夾緊背部，將帶子拉向腹部兩側。" },
+                "彈力繩胸推": { sets: 3, reps: isM?12:10, unit: "下", tips: "雙手前推感受胸肌收縮，慢放快推。" },
+                "勾腳尖蹬腿": { sets: 3, reps: 15, unit: "下", tips: "用力勾起腳尖，腿部完全伸直，保護膝蓋。" },
+                "二頭/三頭組合": { sets: 3, reps: isM?12:10, unit: "下", tips: "手肘固定不動，感受手臂肌肉收縮。" },
+                "開合跳": { sets: 3, reps: 40, unit: "秒", tips: "輕盈跳躍，利用腳尖緩衝，雙手過頭。" }
             };
         };
 
@@ -197,8 +198,7 @@
             document.getElementById('action-title').innerText = name;
             renderDailyTasks();
 
-            const unit = ex.type === "secs" ? "秒" : "下";
-            speak(`${hero.msg}。接下來是${name}，共${ex.sets}組，每組${ex.reps}${unit}。動作要領：${ex.tips}。朋友們，如果覺得太快或太慢，可以在下方調整動作快慢喔！`);
+            speak(`${hero.msg}。接下來是${name}，共${ex.sets}組，每組${ex.reps}${ex.unit}。動作要領：${ex.tips}。朋友們，如果覺得太快或太慢，可以在下方調整動作快慢喔！`);
             
             workoutState = 'WORKING';
             setCounter = 1;
@@ -216,7 +216,7 @@
             speak(`${setNames[setCounter] || "下一組"}，開始！`);
 
             timerId = setTimeout(() => {
-                if (ex.type === "secs") {
+                if (ex.unit === "秒") {
                     let left = ex.reps;
                     document.getElementById('display-val').innerText = left;
                     timerId = setInterval(() => {
@@ -224,7 +224,7 @@
                         document.getElementById('display-val').innerText = left;
                         if (left <= 3 && left > 0) speak(left.toString());
                         if (left <= 0) { clearAllTimers(); finishSet(name); }
-                    }, 1000); // 計時固定 1 秒
+                    }, 1000);
                 } else {
                     const counting = () => {
                         if (workoutState !== 'WORKING') return;
@@ -232,12 +232,12 @@
                             repCounter++;
                             document.getElementById('display-val').innerText = repCounter;
                             speak(repCounter.toString());
-                            timerId = setTimeout(counting, pacingSeconds * 1000); // 計次受滑桿影響
+                            timerId = setTimeout(counting, pacingSeconds * 1000);
                         } else { clearAllTimers(); finishSet(name); }
                     };
                     counting();
                 }
-            }, 2000); // 喊完開始後靜默 2 秒
+            }, 2000); 
         }
 
         function finishSet(name) {
@@ -248,7 +248,7 @@
                 document.getElementById('display-val').innerText = restTime;
                 document.getElementById('timer-progress').style.stroke = "#10b981";
                 const enc = encouragements[Math.floor(Math.random() * encouragements.length)];
-                speak(`漂亮，休息三十秒。現在重複動作要領：${ex.tips}。${enc}`);
+                speak(`休息三十秒。現在重複動作要領：${ex.tips}。${enc}`);
                 timerId = setInterval(() => {
                     restTime--;
                     document.getElementById('display-val').innerText = restTime;
@@ -267,16 +267,14 @@
             if (!unlockedActions.includes(name)) return;
             if (!completedActions.includes(name)) completedActions.push(name);
             renderDailyTasks();
-            const required = currentGender === 'male' ? 4 : 4;
-            if (completedActions.length === required) {
-                const history = JSON.parse(localStorage.getItem('vHist_ycy_strict')) || [];
+            if (completedActions.length === 4) {
+                const history = JSON.parse(localStorage.getItem('vHist_ycy_strict_final_v2')) || [];
                 const ds = new Date().toLocaleDateString();
                 if (!history.includes(ds)) {
-                    history.push(ds); localStorage.setItem('vHist_ycy_strict', JSON.stringify(history));
+                    history.push(ds); localStorage.setItem('vHist_ycy_strict_final_v2', JSON.stringify(history));
                     renderCalendar();
                     document.getElementById('reward-msg').innerText = `${currentGender==='male'?'你':'妳'}完成了今日特訓！By ycy 2026`;
                     document.getElementById('reward-modal').classList.remove('hidden');
-                    speak("今日任務全達成！朋友們，妳做到了！");
                 }
             }
         }
@@ -297,10 +295,9 @@
                 const isDone = completedActions.includes(name);
                 const isActive = (activeExName === name);
                 const isUnlocked = unlockedActions.includes(name);
-                const unit = ex.type === "secs" ? "秒" : "下";
                 const card = document.createElement('div');
                 card.className = `glass p-8 rounded-[3rem] task-card ${isDone?'completed':''} ${isActive?'active-now':''}`;
-                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h4 class="font-black text-white text-2xl">${name}</h4><p class="text-base text-main uppercase font-bold tracking-widest">${ex.sets}組 ∙ ${ex.reps}${unit}</p></div><button onclick="runEx('${name}')" class="bg-slate-700 text-white text-sm font-black px-6 py-3 rounded-full active:scale-95">開始訓練</button></div><p class="text-base text-slate-300 mb-8 italic">動作要領：${ex.tips}</p><button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] font-black uppercase text-lg ${isDone?'bg-emerald-500 text-white':(isUnlocked?'btn-confirm-unlocked':'btn-confirm-locked')}">${isDone?'✅ 任務達成':(isUnlocked?'點擊確認完成':'運動三組後解鎖')}</button>`;
+                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h4 class="font-black text-white text-2xl">${name}</h4><p class="text-base text-main uppercase font-bold tracking-widest">${ex.sets}組 ∙ ${ex.reps}${ex.unit}</p></div><button onclick="runEx('${name}')" class="bg-slate-700 text-white text-sm font-black px-6 py-3 rounded-full active:scale-95">開始訓練</button></div><p class="text-base text-slate-300 mb-8 italic">動作要領：${ex.tips}</p><button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] font-black uppercase text-lg ${isDone?'bg-emerald-500 text-white':(isUnlocked?'btn-confirm-unlocked':'btn-confirm-locked')}">${isDone?'✅ 任務達成':(isUnlocked?'點擊確認完成':'運動三組後解鎖')}</button>`;
                 listEl.appendChild(card);
             });
         }
@@ -308,12 +305,12 @@
         function updatePacing(val) { pacingSeconds = parseFloat(val); document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s"; }
         function selectDay(d) { const idx = scheduleDays.indexOf(d); if (idx > -1) scheduleDays.splice(idx, 1); else if (scheduleDays.length < 4) scheduleDays.push(d); updatePickerUI(); }
         function updatePickerUI() { document.querySelectorAll('.day-btn').forEach((btn, i) => { const d = [1,2,3,4,5,6,0][i]; btn.className = scheduleDays.includes(d) ? 'day-btn active' : 'day-btn'; }); }
-        function confirmSchedule() { localStorage.setItem('vSch_ycy_strict_vFinal', JSON.stringify(scheduleDays)); renderCalendar(); renderDailyTasks(); speak("排程保存完成。"); }
-        function resetSchedule() { scheduleDays = []; localStorage.removeItem('vSch_ycy_strict_vFinal'); updatePickerUI(); renderCalendar(); renderDailyTasks(); }
+        function confirmSchedule() { localStorage.setItem('vSch_ycy_final_strict', JSON.stringify(scheduleDays)); renderCalendar(); renderDailyTasks(); speak("排程保存完成。"); }
+        function resetSchedule() { scheduleDays = []; localStorage.removeItem('vSch_ycy_final_strict'); updatePickerUI(); renderCalendar(); renderDailyTasks(); }
 
         function renderCalendar() {
             const now = new Date();
-            const history = JSON.parse(localStorage.getItem('vHist_ycy_strict')) || [];
+            const history = JSON.parse(localStorage.getItem('vHist_ycy_strict_final_v2')) || [];
             const container = document.getElementById('calendar-days');
             container.innerHTML = '';
             const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
@@ -323,7 +320,8 @@
             for(let d=1; d<=total; d++) {
                 const dateObj = new Date(now.getFullYear(), now.getMonth(), d);
                 const ds = dateObj.toLocaleDateString();
-                container.innerHTML += `<div class="calendar-day ${ds===new Date().toLocaleDateString()?'today-mark':''} ${scheduleDays.includes(dateObj.getDay())?'workout-day':''} ${history.includes(ds)?'done-history':''}"><span>${d}</span></div>`;
+                const isSch = scheduleDays.includes(new Date(now.getFullYear(), now.getMonth(), d).getDay());
+                container.innerHTML += `<div class="calendar-day ${ds===new Date().toLocaleDateString()?'today-mark':''} ${isSch?'workout-day':''} ${history.includes(ds)?'done-history':''}"><span>${d}</span></div>`;
             }
         }
 
