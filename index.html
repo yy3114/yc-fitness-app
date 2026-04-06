@@ -15,10 +15,10 @@
         .text-main { color: var(--main); }
         .border-main { border-color: var(--main); }
         
-        /* 動作方塊狀態控制 */
-        .task-card { border: 2px solid transparent; transition: all 0.3s ease; }
-        .task-card.active-now { border-color: var(--main); box-shadow: 0 0 20px var(--main); transform: scale(1.02); background: rgba(255,255,255,0.05); }
-        .task-card.completed { border-color: #10b981; background: rgba(16, 185, 129, 0.1) !important; opacity: 0.8; }
+        /* 動作方塊動態顯色 */
+        .task-card { border: 2px solid transparent; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .task-card.active-now { border-color: var(--main); box-shadow: 0 0 25px var(--main); transform: scale(1.03); background: rgba(255,255,255,0.1); z-index: 10; }
+        .task-card.completed { border-color: #10b981; background: rgba(16, 185, 129, 0.15) !important; opacity: 0.7; }
         
         .today-mark { background: #ef4444 !important; color: white !important; border-radius: 50%; font-weight: 900; }
         .workout-day { border: 2px solid var(--main); border-radius: 50%; }
@@ -87,7 +87,7 @@
                     </div>
                 </div>
                 <h3 id="action-title" class="text-2xl font-black mb-2 text-white uppercase italic tracking-tighter">READY?</h3>
-                <p id="action-coach-name" class="text-base text-slate-400 italic">選取下方動作開始</p>
+                <p id="action-coach-name" class="text-base text-slate-400 italic">選取下方動作開始任務</p>
             </div>
         </section>
 
@@ -125,7 +125,7 @@
         let timerId = null;
         let pacingSeconds = 2.0;
         let sessionCompletedNames = [];
-        let mySchedule = JSON.parse(localStorage.getItem('vSch_ycy_2026_final_v4')) || [];
+        let mySchedule = JSON.parse(localStorage.getItem('vSch_ycy_2026_vFinal_v5')) || [];
 
         const heroes = {
             male: [
@@ -163,7 +163,6 @@
             "堅持下去，英雄就是這樣煉成的！",
             "做得好，朋友們，感受肌肉的力量！",
             "再堅持一下，成果就在眼前了！",
-            "妳做得比想像中還要出色！",
             "為了更強大的明天，我們一起努力！"
         ];
 
@@ -205,8 +204,8 @@
             
             workoutState = 'WORKING';
             setCounter = 1;
-            // 給予足夠時間唸完旁白，然後強行數數
-            setTimeout(() => startSetLoop(name), 8000);
+            // 給予充足時間唸完開場白 (8秒)
+            timerId = setTimeout(() => startSetLoop(name), 8500);
         }
 
         function startSetLoop(name) {
@@ -217,11 +216,10 @@
             document.getElementById('display-val').innerText = "0";
             document.getElementById('timer-progress').style.stroke = "currentColor";
             
-            // 1. "開始宣告"
+            // 喊完第幾組開始後，靜默 2 秒才開始數數
             speak(`${setNames[setCounter] || "下一組"}，開始！`);
 
-            // 2. 核心變更：數數開始前增加 1.5 秒延遲
-            setTimeout(() => {
+            timerId = setTimeout(() => {
                 if (name === "核心棒式" || name === "開合跳" || config.reps.toString().includes("秒")) {
                     let left = parseInt(config.reps);
                     timerId = setInterval(() => {
@@ -242,7 +240,7 @@
                     };
                     countReps();
                 }
-            }, 1500); // 這裡是 1.5 秒延遲
+            }, 2000); // 這裡是 2 秒間隔延遲
         }
 
         function finishSet(name) {
@@ -254,7 +252,7 @@
                 document.getElementById('timer-progress').style.stroke = "#10b981";
                 
                 const enc = encouragements[Math.floor(Math.random() * encouragements.length)];
-                speak(`漂亮，休息三十秒。現在複習動作要領：${config.tips}。${enc}`);
+                speak(`休息三十秒。動作要領：${config.tips}。${enc}`);
                 
                 timerId = setInterval(() => {
                     rest--;
@@ -263,26 +261,27 @@
                         resetAllTimers(); 
                         setCounter++; 
                         workoutState = 'WORKING'; 
-                        startSetLoop(name); 
+                        startSetLoop(name); // 進入下一組，會自動觸發 startSetLoop 裡的 2 秒延遲
                     }
                 }, 1000);
             } else {
                 workoutState = 'IDLE';
                 currentExName = null;
                 renderDailyTasks();
-                speak("這項任務完成了！朋友們，妳做得很棒，請點擊確認按鈕。");
+                speak("這項動作完成了！朋友們，妳做得很棒，請點擊確認按鈕。");
             }
         }
 
         function confirmItem(name) {
             if (!sessionCompletedNames.includes(name)) sessionCompletedNames.push(name);
             renderDailyTasks();
-            if (sessionCompletedNames.length === 4) {
-                const h = JSON.parse(localStorage.getItem('vHist_ycy_2026_vFinal')) || [];
+            const totalRequired = currentGender === 'male' ? 4 : 4;
+            if (sessionCompletedNames.length === totalRequired) {
+                const h = JSON.parse(localStorage.getItem('vHist_ycy_2026_fixed')) || [];
                 const ds = new Date().toLocaleDateString();
                 if (!h.includes(ds)) {
                     h.push(ds);
-                    localStorage.setItem('vHist_ycy_2026_vFinal', JSON.stringify(h));
+                    localStorage.setItem('vHist_ycy_2026_fixed', JSON.stringify(h));
                     renderCalendar();
                     showPop();
                 }
@@ -302,7 +301,7 @@
             listEl.innerHTML = '';
             const todayNum = new Date().getDay();
             if (!mySchedule.includes(todayNum)) {
-                document.getElementById('daily-goal-text').innerText = "今日為修復日，休息是為了走更長遠的路。";
+                document.getElementById('daily-goal-text').innerText = "今日為修復日，好好休息！";
                 return;
             }
             document.getElementById('daily-goal-text').innerText = "今日目標：強化肌耐力，打造英雄體態。";
@@ -321,7 +320,7 @@
 
         function renderCalendar() {
             const now = new Date();
-            const history = JSON.parse(localStorage.getItem('vHist_ycy_2026_vFinal')) || [];
+            const history = JSON.parse(localStorage.getItem('vHist_ycy_2026_fixed')) || [];
             const container = document.getElementById('calendar-days');
             container.innerHTML = '';
             const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
@@ -343,12 +342,12 @@
         }
 
         function confirmSchedule() {
-            localStorage.setItem('vSch_ycy_2026_final_v4', JSON.stringify(mySchedule));
+            localStorage.setItem('vSch_ycy_2026_vFinal_v5', JSON.stringify(mySchedule));
             renderCalendar(); renderDailyTasks(); speak("日程已更新！");
         }
 
         function resetSchedule() {
-            mySchedule = []; localStorage.removeItem('vSch_ycy_2026_final_v4');
+            mySchedule = []; localStorage.removeItem('vSch_ycy_2026_vFinal_v5');
             document.querySelectorAll('.day-btn').forEach(btn => btn.className = 'day-btn');
             renderCalendar(); renderDailyTasks();
         }
