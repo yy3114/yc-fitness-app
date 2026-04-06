@@ -14,9 +14,12 @@
         .bg-main { background-color: var(--main); }
         .text-main { color: var(--main); }
         .border-main { border-color: var(--main); }
+        
+        /* 動作方塊狀態控制 */
         .task-card { border: 2px solid transparent; transition: all 0.3s ease; }
         .task-card.active-now { border-color: var(--main); box-shadow: 0 0 20px var(--main); transform: scale(1.02); background: rgba(255,255,255,0.05); }
         .task-card.completed { border-color: #10b981; background: rgba(16, 185, 129, 0.1) !important; opacity: 0.8; }
+        
         .today-mark { background: #ef4444 !important; color: white !important; border-radius: 50%; font-weight: 900; }
         .workout-day { border: 2px solid var(--main); border-radius: 50%; }
         .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; color: #475569; font-size: 14px; }
@@ -92,7 +95,7 @@
 
         <div class="glass p-6 rounded-3xl border border-slate-700 mb-12">
             <div class="flex justify-between items-center mb-3">
-                <span class="text-sm font-black text-slate-400 uppercase tracking-widest italic">⚡️ 動作節奏 (秒/次)</span>
+                <span class="text-sm font-black text-slate-400 uppercase tracking-widest italic">⚡️ 動作數數節奏 (秒/次)</span>
                 <span id="pacing-val" class="text-xl font-black text-main">2.0s</span>
             </div>
             <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" class="w-full" oninput="updatePacing(this.value)">
@@ -122,7 +125,7 @@
         let timerId = null;
         let pacingSeconds = 2.0;
         let sessionCompletedNames = [];
-        let mySchedule = JSON.parse(localStorage.getItem('vSch_ycy_v2026_final')) || [];
+        let mySchedule = JSON.parse(localStorage.getItem('vSch_ycy_2026_final_v4')) || [];
 
         const heroes = {
             male: [
@@ -202,7 +205,7 @@
             
             workoutState = 'WORKING';
             setCounter = 1;
-            // 8秒後正式開始數數
+            // 給予足夠時間唸完旁白，然後強行數數
             setTimeout(() => startSetLoop(name), 8000);
         }
 
@@ -214,29 +217,32 @@
             document.getElementById('display-val').innerText = "0";
             document.getElementById('timer-progress').style.stroke = "currentColor";
             
-            // 明確說明第幾組
+            // 1. "開始宣告"
             speak(`${setNames[setCounter] || "下一組"}，開始！`);
 
-            if (name === "核心棒式" || name === "開合跳" || config.reps.toString().includes("秒")) {
-                let left = parseInt(config.reps);
-                timerId = setInterval(() => {
-                    left--;
-                    document.getElementById('display-val').innerText = left;
-                    if (left <= 3 && left > 0) speak(left.toString());
-                    if (left <= 0) { resetAllTimers(); finishSet(name); }
-                }, 1000);
-            } else {
-                const countReps = () => {
-                    if (workoutState !== 'WORKING') return;
-                    if (repCounter < config.reps) {
-                        repCounter++;
-                        document.getElementById('display-val').innerText = repCounter;
-                        speak(repCounter.toString());
-                        timerId = setTimeout(countReps, pacingSeconds * 1000);
-                    } else { resetAllTimers(); finishSet(name); }
-                };
-                setTimeout(countReps, 1500); // 稍微等待「第一組開始」講完
-            }
+            // 2. 核心變更：數數開始前增加 1.5 秒延遲
+            setTimeout(() => {
+                if (name === "核心棒式" || name === "開合跳" || config.reps.toString().includes("秒")) {
+                    let left = parseInt(config.reps);
+                    timerId = setInterval(() => {
+                        left--;
+                        document.getElementById('display-val').innerText = left;
+                        if (left <= 3 && left > 0) speak(left.toString());
+                        if (left <= 0) { resetAllTimers(); finishSet(name); }
+                    }, 1000);
+                } else {
+                    const countReps = () => {
+                        if (workoutState !== 'WORKING') return;
+                        if (repCounter < config.reps) {
+                            repCounter++;
+                            document.getElementById('display-val').innerText = repCounter;
+                            speak(repCounter.toString());
+                            timerId = setTimeout(countReps, pacingSeconds * 1000);
+                        } else { resetAllTimers(); finishSet(name); }
+                    };
+                    countReps();
+                }
+            }, 1500); // 這裡是 1.5 秒延遲
         }
 
         function finishSet(name) {
@@ -247,9 +253,8 @@
                 document.getElementById('display-val').innerText = rest;
                 document.getElementById('timer-progress').style.stroke = "#10b981";
                 
-                // 休息期間重複要領與鼓勵
                 const enc = encouragements[Math.floor(Math.random() * encouragements.length)];
-                speak(`休息三十秒。現在複習動作要領：${config.tips}。${enc}`);
+                speak(`漂亮，休息三十秒。現在複習動作要領：${config.tips}。${enc}`);
                 
                 timerId = setInterval(() => {
                     rest--;
@@ -265,7 +270,7 @@
                 workoutState = 'IDLE';
                 currentExName = null;
                 renderDailyTasks();
-                speak("這項任務完成了！妳做得很棒，朋友們，請點擊確認按鈕。");
+                speak("這項任務完成了！朋友們，妳做得很棒，請點擊確認按鈕。");
             }
         }
 
@@ -297,10 +302,10 @@
             listEl.innerHTML = '';
             const todayNum = new Date().getDay();
             if (!mySchedule.includes(todayNum)) {
-                document.getElementById('daily-goal-text').innerText = "今日為修復日，好好休息！";
+                document.getElementById('daily-goal-text').innerText = "今日為修復日，休息是為了走更長遠的路。";
                 return;
             }
-            document.getElementById('daily-goal-text').innerText = "今日目標：強化肌耐力，挑戰極限。";
+            document.getElementById('daily-goal-text').innerText = "今日目標：強化肌耐力，打造英雄體態。";
             const exList = currentGender === 'male' ? ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] : ["勾腳尖蹬腿", "彈力繩胸推", "核心棒式", "二頭/三頭組合"];
             const config = getExConfig();
             exList.forEach(name => {
@@ -338,12 +343,12 @@
         }
 
         function confirmSchedule() {
-            localStorage.setItem('vSch_ycy_2026_vFinal', JSON.stringify(mySchedule));
+            localStorage.setItem('vSch_ycy_2026_final_v4', JSON.stringify(mySchedule));
             renderCalendar(); renderDailyTasks(); speak("日程已更新！");
         }
 
         function resetSchedule() {
-            mySchedule = []; localStorage.removeItem('vSch_ycy_2026_vFinal');
+            mySchedule = []; localStorage.removeItem('vSch_ycy_2026_final_v4');
             document.querySelectorAll('.day-btn').forEach(btn => btn.className = 'day-btn');
             renderCalendar(); renderDailyTasks();
         }
