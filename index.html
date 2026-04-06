@@ -15,17 +15,26 @@
         .text-main { color: var(--main); }
         .border-main { border-color: var(--main); }
         
-        /* 動作方塊動態顯色 */
-        .task-card { border: 2px solid transparent; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .task-card.active-now { border-color: var(--main); box-shadow: 0 0 25px var(--main); transform: scale(1.03); background: rgba(255,255,255,0.1); z-index: 10; }
-        .task-card.completed { border-color: #10b981; background: rgba(16, 185, 129, 0.15) !important; opacity: 0.7; }
+        /* 動作方塊狀態控制 */
+        .task-card { border: 2px solid transparent; transition: all 0.4s ease; background: rgba(30, 41, 59, 0.4); }
+        .task-card.active-now { border-color: var(--main); box-shadow: 0 0 25px var(--main); transform: scale(1.02); background: rgba(255, 255, 255, 0.05); }
+        .task-card.completed { border-color: #10b981; background: rgba(16, 185, 129, 0.15) !important; opacity: 0.8; }
         
+        /* 按鈕鎖定樣式 */
+        .btn-locked { background-color: #1e293b !important; color: #475569 !important; border: 1px solid #334155 !important; cursor: not-allowed !important; pointer-events: none; }
+        .btn-unlocked { background-color: var(--main); color: white; border: none; cursor: pointer; animation: pulse-border 2s infinite; }
+        
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
         .today-mark { background: #ef4444 !important; color: white !important; border-radius: 50%; font-weight: 900; }
         .workout-day { border: 2px solid var(--main); border-radius: 50%; }
         .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; color: #475569; font-size: 14px; }
         .done-history::after { content: '⭐'; position: absolute; bottom: -2px; right: -2px; font-size: 10px; color: #f59e0b; }
-        .progress-ring { transition: stroke-dashoffset 0.3s; transform: rotate(-90deg); transform-origin: 50% 50%; }
-        .day-btn { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; color: #475569; }
+        .day-btn { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; color: #475569; transition: all 0.2s; }
         .day-btn.active { background-color: var(--main); color: white; border-color: var(--main); }
         #entry-screen { position: fixed; inset: 0; z-index: 100; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; transition: opacity 0.8s ease; }
     </style>
@@ -36,7 +45,7 @@
         <div class="max-w-xs w-full">
             <h1 class="text-5xl font-black tracking-tighter italic text-white mb-2">Vitality<span class="text-blue-500">PRO</span></h1>
             <p class="text-slate-500 text-base font-bold tracking-widest mb-16 uppercase">By ycy ∙ Elite Coaching</p>
-            <button onclick="startApp()" class="w-full bg-blue-600 py-6 rounded-[2.5rem] text-white font-black text-xl shadow-2xl">開啟充滿活力的一天</button>
+            <button onclick="startApp()" class="w-full bg-blue-600 py-6 rounded-[2.5rem] text-white font-black text-xl shadow-2xl animate-pulse">開啟充滿活力的一天</button>
         </div>
     </div>
 
@@ -46,23 +55,23 @@
                 <h1 class="text-3xl font-black tracking-tighter italic text-white">Vitality<span class="text-main">PRO</span><span class="text-sm font-normal text-slate-500 not-italic ml-2">by ycy</span></h1>
                 <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-2xl">🔊</button>
             </div>
-            <button onclick="toggleGender()" id="gender-btn" class="w-full py-5 rounded-2xl bg-main text-base font-black text-white shadow-lg uppercase tracking-widest active:scale-95">切換模式 (目前:男性)</button>
+            <button onclick="toggleGender()" id="gender-btn" class="w-full py-5 rounded-2xl bg-main text-base font-black text-white shadow-lg uppercase tracking-widest active:scale-95 transition-all">切換模式 (目前:男性)</button>
         </header>
 
         <div class="glass p-6 rounded-[2.5rem] mb-8 border border-slate-700">
             <h4 class="text-sm font-black text-main uppercase tracking-widest mb-4 text-center italic">設定特訓日 (最多4天)</h4>
-            <div class="flex justify-between mb-6">
+            <div class="flex justify-between mb-6" id="schedule-picker">
                 <button class="day-btn" data-day="1">一</button><button class="day-btn" data-day="2">二</button><button class="day-btn" data-day="3">三</button><button class="day-btn" data-day="4">四</button><button class="day-btn" data-day="5">五</button><button class="day-btn" data-day="6">六</button><button class="day-btn" data-day="0">日</button>
             </div>
             <div class="flex gap-4">
-                <button onclick="confirmSchedule()" class="flex-1 bg-main py-4 rounded-2xl font-black text-xs text-white uppercase">確定設定</button>
-                <button onclick="resetSchedule()" class="flex-1 bg-slate-800 py-4 rounded-2xl font-black text-xs text-slate-400 uppercase">重設</button>
+                <button onclick="confirmSchedule()" class="flex-1 bg-main py-4 rounded-2xl font-black text-xs text-white uppercase tracking-widest">確定設定</button>
+                <button onclick="resetSchedule()" class="flex-1 bg-slate-800 py-4 rounded-2xl font-black text-xs text-slate-400 uppercase tracking-widest">重設</button>
             </div>
         </div>
 
         <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 mb-8 text-center">
             <h4 class="text-xs font-black text-main uppercase tracking-widest mb-2">今天的目標</h4>
-            <p id="daily-goal-text" class="text-base text-slate-200 font-medium italic">請先完成上方排程</p>
+            <p id="daily-goal-text" class="text-base text-slate-200 font-medium italic">請先設定排程</p>
         </div>
 
         <section class="glass rounded-[2rem] p-5 shadow-2xl mb-10 text-center">
@@ -72,34 +81,21 @@
         <section class="bg-slate-800/30 rounded-[3.5rem] p-10 text-white shadow-2xl relative border border-slate-700/50 mb-12 text-center">
             <p class="text-sm font-black text-main uppercase tracking-widest mb-4"><span class="coach-pronoun">你</span>今天的教練</p>
             <div class="flex justify-center mb-8">
-                <div class="w-32 h-32 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl">
+                <div class="w-32 h-32 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl transition-all duration-500">
                     <img id="hero-img" src="https://i.postimg.cc/02dzjW8X/1775410232847.png" class="w-full h-full object-cover">
                 </div>
             </div>
             <div class="flex flex-col items-center">
                 <div class="relative mb-8">
-                    <svg width="150" height="150">
-                        <circle cx="75" cy="75" r="68" stroke="#1e293b" stroke-width="8" fill="transparent" />
-                        <circle id="timer-progress" cx="75" cy="75" r="68" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="427" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring text-main" />
-                    </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="display-val" class="text-7xl font-black italic tracking-tighter">--</span>
-                    </div>
+                    <svg width="150" height="150"><circle cx="75" cy="75" r="68" stroke="#1e293b" stroke-width="8" fill="transparent" /><circle id="timer-progress" cx="75" cy="75" r="68" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="427" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring text-main" /></svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="display-val" class="text-7xl font-black italic tracking-tighter">--</span></div>
                 </div>
                 <h3 id="action-title" class="text-2xl font-black mb-2 text-white uppercase italic tracking-tighter">READY?</h3>
-                <p id="action-coach-name" class="text-base text-slate-400 italic">選取下方動作開始任務</p>
+                <p id="action-coach-name" class="text-base text-slate-400 italic">選取動作開始特訓</p>
             </div>
         </section>
 
         <div id="daily-task-list" class="space-y-8 mb-16"></div>
-
-        <div class="glass p-6 rounded-3xl border border-slate-700 mb-12">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-sm font-black text-slate-400 uppercase tracking-widest italic">⚡️ 動作數數節奏 (秒/次)</span>
-                <span id="pacing-val" class="text-xl font-black text-main">2.0s</span>
-            </div>
-            <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" class="w-full" oninput="updatePacing(this.value)">
-        </div>
 
         <footer class="text-center py-10 border-t border-slate-800">
             <p class="text-sm text-slate-600 font-bold tracking-widest uppercase">VitalityPro | Elite Coaching | By ycy 2026</p>
@@ -119,13 +115,14 @@
         let currentGender = 'male';
         let isVoiceOn = true;
         let workoutState = 'IDLE'; 
-        let currentExName = null;
+        let activeTaskName = null; 
         let setCounter = 1;
         let repCounter = 0;
         let timerId = null;
         let pacingSeconds = 2.0;
-        let sessionCompletedNames = [];
-        let mySchedule = JSON.parse(localStorage.getItem('vSch_ycy_2026_vFinal_v5')) || [];
+        let sessionCompletedNames = []; // 已經點擊確認的
+        let unlockNames = []; // 已經跑完三組可以點擊確認的
+        let mySchedule = JSON.parse(localStorage.getItem('vSch_2026_strict_v1')) || [];
 
         const heroes = {
             male: [
@@ -147,8 +144,8 @@
         const getExConfig = () => {
             const isM = currentGender === 'male';
             return {
-                "伏地挺身": { sets: isM?3:2, reps: isM?12:8, tips: "與肩同寬，推起時吐氣，背部保持平直。" },
-                "負重深蹲": { sets: 3, reps: isM?15:12, tips: "腳踩穩，屁股像坐椅子，膝蓋不超腳尖。" },
+                "伏地挺身": { sets: isM?3:2, reps: isM?12:8, tips: "穩定呼吸，推起時吐氣，背部平直。" },
+                "負重深蹲": { sets: 3, reps: isM?15:12, tips: "重心在腳跟，屁股像坐椅子，膝蓋不超尖。" },
                 "核心棒式": { sets: 3, reps: isM?40:30, tips: "全身呈一線，腹部收緊，不要憋氣。" },
                 "彈力繩划船": { sets: isM?3:2, reps: isM?12:10, tips: "挺胸夾緊背部，帶子拉至腹部兩側。" },
                 "彈力繩胸推": { sets: isM?3:2, reps: isM?12:10, tips: "雙手前推感受胸肌收縮，慢放快推。" },
@@ -158,13 +155,7 @@
             };
         };
 
-        const encouragements = [
-            "加油，你可以的！",
-            "堅持下去，英雄就是這樣煉成的！",
-            "做得好，朋友們，感受肌肉的力量！",
-            "再堅持一下，成果就在眼前了！",
-            "為了更強大的明天，我們一起努力！"
-        ];
+        const encouragements = ["加油，妳可以的！", "堅持下去，英雄就是這樣煉成的！", "做得好，朋友們，感受肌肉的力量！", "再堅持一下，成果就在眼前了！"];
 
         function speak(text) {
             if (!isVoiceOn) return;
@@ -187,10 +178,10 @@
         }
 
         function runEx(name) {
+            if (workoutState !== 'IDLE') return;
             resetAllTimers();
-            currentExName = name;
-            const pool = heroes[currentGender];
-            const hero = pool[Math.floor(Math.random() * pool.length)];
+            activeTaskName = name;
+            const hero = heroes[currentGender][Math.floor(Math.random() * 5)];
             const config = getExConfig()[name];
             
             document.getElementById('hero-img').src = hero.img;
@@ -198,13 +189,13 @@
             document.getElementById('action-title').innerText = name;
             renderDailyTasks();
 
-            const repsVal = typeof config.reps === 'number' ? config.reps + "下" : config.reps;
+            const repsVal = typeof config.reps === 'number' ? config.reps + "下" : config.reps + "秒";
             const intro = `${hero.msg}。接下來是${name}，共${config.sets}組，每組${repsVal}。動作要領：${config.tips}`;
             speak(intro);
             
             workoutState = 'WORKING';
             setCounter = 1;
-            // 給予充足時間唸完開場白 (8秒)
+            // 8.5秒引導唸完後啟動
             timerId = setTimeout(() => startSetLoop(name), 8500);
         }
 
@@ -216,9 +207,9 @@
             document.getElementById('display-val').innerText = "0";
             document.getElementById('timer-progress').style.stroke = "currentColor";
             
-            // 喊完第幾組開始後，靜默 2 秒才開始數數
             speak(`${setNames[setCounter] || "下一組"}，開始！`);
 
+            // 嚴格落實：宣告後靜默 2 秒才開始數數
             timerId = setTimeout(() => {
                 if (name === "核心棒式" || name === "開合跳" || config.reps.toString().includes("秒")) {
                     let left = parseInt(config.reps);
@@ -240,7 +231,7 @@
                     };
                     countReps();
                 }
-            }, 2000); // 這裡是 2 秒間隔延遲
+            }, 2000);
         }
 
         function finishSet(name) {
@@ -250,7 +241,6 @@
                 let rest = 30;
                 document.getElementById('display-val').innerText = rest;
                 document.getElementById('timer-progress').style.stroke = "#10b981";
-                
                 const enc = encouragements[Math.floor(Math.random() * encouragements.length)];
                 speak(`休息三十秒。動作要領：${config.tips}。${enc}`);
                 
@@ -261,27 +251,29 @@
                         resetAllTimers(); 
                         setCounter++; 
                         workoutState = 'WORKING'; 
-                        startSetLoop(name); // 進入下一組，會自動觸發 startSetLoop 裡的 2 秒延遲
+                        startSetLoop(name); 
                     }
                 }, 1000);
             } else {
                 workoutState = 'IDLE';
-                currentExName = null;
+                activeTaskName = null;
+                // 核心邏輯：跑完最後一組，解鎖確認按鈕
+                if (!unlockNames.includes(name)) unlockNames.push(name);
                 renderDailyTasks();
-                speak("這項動作完成了！朋友們，妳做得很棒，請點擊確認按鈕。");
+                speak("這項任務完成了！朋友們，妳做得很棒，請點擊下方的確認按鈕。");
             }
         }
 
         function confirmItem(name) {
+            if (!unlockNames.includes(name)) return; // 防作弊
             if (!sessionCompletedNames.includes(name)) sessionCompletedNames.push(name);
             renderDailyTasks();
-            const totalRequired = currentGender === 'male' ? 4 : 4;
-            if (sessionCompletedNames.length === totalRequired) {
-                const h = JSON.parse(localStorage.getItem('vHist_ycy_2026_fixed')) || [];
+            if (sessionCompletedNames.length === 4) {
+                const h = JSON.parse(localStorage.getItem('vHist_2026_strict')) || [];
                 const ds = new Date().toLocaleDateString();
                 if (!h.includes(ds)) {
                     h.push(ds);
-                    localStorage.setItem('vHist_ycy_2026_fixed', JSON.stringify(h));
+                    localStorage.setItem('vHist_2026_strict', JSON.stringify(h));
                     renderCalendar();
                     showPop();
                 }
@@ -307,20 +299,36 @@
             document.getElementById('daily-goal-text').innerText = "今日目標：強化肌耐力，打造英雄體態。";
             const exList = currentGender === 'male' ? ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] : ["勾腳尖蹬腿", "彈力繩胸推", "核心棒式", "二頭/三頭組合"];
             const config = getExConfig();
+            
             exList.forEach(name => {
                 const ex = config[name];
                 const isDone = sessionCompletedNames.includes(name);
+                const isUnlocked = unlockNames.includes(name);
                 const isActive = currentExName === name;
+                
                 const card = document.createElement('div');
                 card.className = `glass p-8 rounded-[3rem] task-card ${isDone ? 'completed' : ''} ${isActive ? 'active-now' : ''}`;
-                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h4 class="font-black text-white text-2xl mb-1">${name}</h4><p class="text-base text-main font-bold uppercase tracking-widest">${ex.sets} 組 ∙ ${ex.reps}${typeof ex.reps === 'number' ? ' 下' : ''}</p></div><button onclick="runEx('${name}')" class="bg-slate-700 text-white text-xs font-black px-6 py-3 rounded-full active:scale-90">開始訓練</button></div><p class="text-base text-slate-300 mb-8 leading-relaxed italic">動作要領：${ex.tips}</p><button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] border border-slate-700 text-base font-black uppercase ${isDone ? 'bg-emerald-500 text-white border-none' : 'text-slate-500'}">${isDone ? '✅ 任務已達成' : '點擊確認完成'}</button>`;
+                
+                // 動態生成確認按鈕，根據 unlockNames 決定是否鎖定
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h4 class="font-black text-white text-2xl mb-1">${name}</h4>
+                            <p class="text-base text-main font-bold uppercase tracking-widest">${ex.sets} 組 ∙ ${ex.reps}</p>
+                        </div>
+                        <button onclick="runEx('${name}')" class="bg-slate-700 text-white text-xs font-black px-6 py-3 rounded-full ${workoutState !== 'IDLE' ? 'opacity-30 pointer-events-none' : ''}">開始訓練</button>
+                    </div>
+                    <p class="text-base text-slate-300 mb-8 leading-relaxed italic">動作要領：${ex.tips}</p>
+                    <button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] text-base font-black uppercase transition-all ${isDone ? 'bg-emerald-500 text-white' : (isUnlocked ? 'btn-unlocked' : 'btn-locked')}">
+                        ${isDone ? '✅ 任務已達成' : (isUnlocked ? '點擊確認完成' : '需完成三組運動後解鎖')}
+                    </button>`;
                 listEl.appendChild(card);
             });
         }
 
         function renderCalendar() {
             const now = new Date();
-            const history = JSON.parse(localStorage.getItem('vHist_ycy_2026_fixed')) || [];
+            const history = JSON.parse(localStorage.getItem('vHist_2026_strict')) || [];
             const container = document.getElementById('calendar-days');
             container.innerHTML = '';
             const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
@@ -342,12 +350,12 @@
         }
 
         function confirmSchedule() {
-            localStorage.setItem('vSch_ycy_2026_vFinal_v5', JSON.stringify(mySchedule));
+            localStorage.setItem('vSch_2026_strict_v1', JSON.stringify(mySchedule));
             renderCalendar(); renderDailyTasks(); speak("日程已更新！");
         }
 
         function resetSchedule() {
-            mySchedule = []; localStorage.removeItem('vSch_ycy_2026_vFinal_v5');
+            mySchedule = []; localStorage.removeItem('vSch_2026_strict_v1');
             document.querySelectorAll('.day-btn').forEach(btn => btn.className = 'day-btn');
             renderCalendar(); renderDailyTasks();
         }
@@ -356,7 +364,7 @@
             currentGender = currentGender === 'male' ? 'female' : 'male';
             document.getElementById('app-body').className = 'pb-20 theme-' + currentGender;
             document.getElementById('gender-btn').innerText = `切換模式 (目前:${currentGender === 'male' ? '男' : '女'}性)`;
-            sessionCompletedNames = [];
+            sessionCompletedNames = []; unlockNames = [];
             document.querySelectorAll('.coach-pronoun').forEach(el => el.innerText = currentGender === 'male' ? '你' : '妳');
             renderCalendar(); renderDailyTasks();
         }
@@ -366,10 +374,8 @@
         function closeModal() { document.getElementById('reward-modal').classList.add('hidden'); }
 
         window.onload = () => {
-            document.querySelectorAll('.day-btn').forEach(btn => {
-                btn.onclick = () => selectDay(parseInt(btn.dataset.day));
-                if (mySchedule.includes(parseInt(btn.dataset.day))) btn.classList.add('active');
-            });
+            document.querySelectorAll('.day-btn').forEach(btn => btn.onclick = () => selectDay(parseInt(btn.dataset.day)));
+            if (mySchedule) document.querySelectorAll('.day-btn').forEach(btn => { if (mySchedule.includes(parseInt(btn.dataset.day))) btn.classList.add('active'); });
             renderCalendar(); renderDailyTasks();
         };
     </script>
