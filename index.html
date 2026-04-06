@@ -16,7 +16,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #0b1120; color: #f8fafc; -webkit-tap-highlight-color: transparent; transition: background 0.5s; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 性別主題顏色 */
+        /* 性別主題顏色：男性藍 / 櫻花淡粉 */
         .theme-male { --main: #3b82f6; --accent: #1d4ed8; }
         .theme-female { --main: #f472b6; --accent: #db2777; }
         
@@ -24,8 +24,8 @@
         .text-main { color: var(--main); }
         .border-main { border-color: var(--main); }
         
-        .today-mark { background: #ef4444 !important; color: white !important; border-radius: 50%; font-weight: 900; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
-        .workout-day { border: 1.5px solid var(--main); border-radius: 50%; }
+        .today-mark { background: #ef4444 !important; color: white !important; border-radius: 50%; font-weight: 900; }
+        .workout-day { border: 2.5px solid var(--main); border-radius: 50%; }
         
         .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; color: #475569; font-size: 14px; }
         .done-history::after { content: '⭐'; position: absolute; bottom: -2px; right: -2px; font-size: 10px; color: #f59e0b; }
@@ -34,23 +34,20 @@
         .task-card { border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s; }
         .task-card.completed { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
 
-        input[type=range] { -webkit-appearance: none; background: #1e293b; height: 10px; border-radius: 5px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: var(--main); cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        /* 星期選取按鈕 */
+        .day-btn { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; transition: all 0.2s; }
+        .day-btn.active { background-color: var(--main); color: white; border-color: var(--main); box-shadow: 0 0 15px var(--main); }
 
-        /* 啟動封面樣式 */
         #entry-screen { position: fixed; inset: 0; z-index: 100; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; transition: opacity 0.8s ease; }
-        
-        /* 1. 英雄頭像縮放樣式 */
-        #hero-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; transition: all 0.3s ease; }
     </style>
 </head>
 <body class="pb-20 theme-male" id="app-body">
 
     <div id="entry-screen">
         <div class="max-w-xs w-full">
-            <h1 class="text-5xl font-black tracking-tighter italic text-white mb-4">Vitality<span class="text-blue-500">PRO</span></h1>
-            <p class="text-slate-500 text-base font-bold tracking-widest mb-16 uppercase">菁英體能特訓 By ycy</p>
-            <button onclick="startApp()" class="w-full bg-blue-600 py-6 rounded-[2.5rem] text-white font-black text-xl shadow-2xl shadow-blue-900/50 animate-pulse">
+            <h1 class="text-5xl font-black tracking-tighter italic text-white mb-2">Vitality<span class="text-blue-500">PRO</span></h1>
+            <p class="text-slate-500 text-base font-bold tracking-widest mb-16 uppercase">By ycy ∙ Elite Coaching</p>
+            <button onclick="startApp()" class="w-full bg-blue-600 py-6 rounded-[2.5rem] text-white font-black text-xl shadow-2xl animate-pulse">
                 開啟充滿活力的一天
             </button>
         </div>
@@ -61,80 +58,92 @@
         <header class="mb-8">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-black tracking-tighter italic text-white">
-                    Vitality<span class="text-main">PRO</span>
+                    Vitality<span class="text-main">PRO</span><span class="text-sm font-normal text-slate-500 not-italic ml-2">by ycy</span>
                 </h1>
-                <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-2xl">🔊</button>
+                <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-2xl shadow-lg">🔊</button>
             </div>
             
             <div class="space-y-5">
                 <button onclick="toggleGender()" id="gender-btn" class="w-full py-5 rounded-2xl bg-main text-base font-black text-white shadow-lg uppercase tracking-widest active:scale-95 transition-all">
                     切換模式 (目前:男性)
                 </button>
-                <div class="glass p-6 rounded-2xl border border-slate-700">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-sm font-black text-slate-400 uppercase tracking-widest italic">⚡️ 動作節奏控制</span>
-                        <span id="pacing-val" class="text-xl font-black text-main">2.0s</span>
-                    </div>
-                    <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" class="w-full" oninput="updatePacing(this.value)">
-                </div>
             </div>
         </header>
 
+        <div class="glass p-6 rounded-[2.5rem] mb-8 border border-slate-700">
+            <h4 class="text-sm font-black text-main uppercase tracking-widest mb-4 text-center italic">設定每週特訓日 (最多4天)</h4>
+            <div class="flex justify-between mb-6" id="schedule-picker">
+                <button class="day-btn" onclick="selectDay(1)">一</button>
+                <button class="day-btn" onclick="selectDay(2)">二</button>
+                <button class="day-btn" onclick="selectDay(3)">三</button>
+                <button class="day-btn" onclick="selectDay(4)">四</button>
+                <button class="day-btn" onclick="selectDay(5)">五</button>
+                <button class="day-btn" onclick="selectDay(6)">六</button>
+                <button class="day-btn" onclick="selectDay(0)">日</button>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="confirmSchedule()" class="flex-1 bg-main py-4 rounded-2xl font-black text-xs text-white uppercase tracking-widest">確定設定</button>
+                <button onclick="resetSchedule()" class="flex-1 bg-slate-800 py-4 rounded-2xl font-black text-xs text-slate-400 uppercase tracking-widest">重設</button>
+            </div>
+        </div>
+
         <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 mb-8">
             <h4 class="text-xs font-black text-main uppercase tracking-widest mb-2">今天的目標</h4>
-            <p id="daily-goal-text" class="text-base text-slate-200 font-medium leading-relaxed italic">準備開啟活力特訓...</p>
+            <p id="daily-goal-text" class="text-base text-slate-200 font-medium leading-relaxed italic">請先設定上方特訓日程...</p>
         </div>
 
         <section class="glass rounded-[2rem] p-5 shadow-2xl mb-10 text-center">
-            <p class="text-[11px] text-slate-500 mb-4 uppercase font-bold tracking-widest">圈號為建議運動日 ∙ 僅限今日完成</p>
+            <p class="text-[11px] text-slate-500 mb-4 uppercase font-bold tracking-widest">圈號為特訓日 ∙ 僅限今日完成</p>
             <div id="calendar-days" class="grid grid-cols-7 gap-2 font-bold"></div>
         </section>
 
         <section class="bg-slate-800/30 rounded-[3.5rem] p-10 text-white shadow-2xl relative border border-slate-700/50 mb-12 text-center">
-            <p class="text-sm font-black text-main uppercase tracking-widest mb-3">
+            <p class="text-sm font-black text-main uppercase tracking-widest mb-4">
                 <span class="coach-pronoun">你</span>今天的教練
             </p>
             
-            <div class="flex justify-center mb-6">
-                <div class="w-24 h-24 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-xl">
-                    <img id="hero-img" src="https://i.postimg.cc/02dzjW8X/1775410232847.png" alt="教練">
+            <div class="flex justify-center mb-8">
+                <div class="w-32 h-32 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl transition-all duration-500">
+                    <img id="hero-img" src="https://i.postimg.cc/02dzjW8X/1775410232847.png" class="w-full h-full object-cover">
                 </div>
             </div>
             
             <div class="flex flex-col items-center">
                 <div class="relative mb-8">
-                    <svg width="140" height="140">
-                        <circle cx="70" cy="70" r="65" stroke="#1e293b" stroke-width="8" fill="transparent" />
-                        <circle id="timer-progress" cx="70" cy="70" r="65" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="408" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring text-main" />
+                    <svg width="150" height="150">
+                        <circle cx="75" cy="75" r="68" stroke="#1e293b" stroke-width="8" fill="transparent" />
+                        <circle id="timer-progress" cx="75" cy="75" r="68" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="427" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring text-main" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <span id="display-val" class="text-7xl font-black italic tracking-tighter">--</span>
                     </div>
                 </div>
-                <h3 id="action-title" class="text-2xl font-black mb-2 text-white uppercase italic">Avengers Assemble</h3>
-                <p id="action-coach-name" class="text-base text-slate-400 italic">選取動作開始特訓</p>
+                <h3 id="action-title" class="text-2xl font-black mb-2 text-white uppercase italic tracking-tighter">Assemble</h3>
+                <p id="action-coach-name" class="text-base text-slate-400 italic">選取動作任務</p>
             </div>
         </section>
 
         <div id="daily-task-list" class="space-y-8 mb-16"></div>
 
-        <div class="flex justify-center gap-12 py-10" id="badge-row">
-            <div id="badge-5" class="opacity-10 grayscale text-6xl transition-all duration-1000">🥉</div>
-            <div id="badge-10" class="opacity-10 grayscale text-6xl transition-all duration-1000">🥈</div>
-            <div id="badge-15" class="opacity-10 grayscale text-6xl transition-all duration-1000">🥇</div>
+        <div class="glass p-6 rounded-3xl border border-slate-700 mb-12">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-sm font-black text-slate-400 uppercase tracking-widest italic">⚡️ 動作數數節奏 (秒/次)</span>
+                <span id="pacing-val" class="text-xl font-black text-main">2.0s</span>
+            </div>
+            <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" class="w-full" oninput="updatePacing(this.value)">
         </div>
 
-        <footer class="text-center py-6 border-t border-slate-800">
-            <p class="text-xs text-slate-600 font-medium">VitalityPro | Elite Training | By ycy</p>
+        <footer class="text-center py-10 border-t border-slate-800">
+            <p class="text-sm text-slate-600 font-bold tracking-widest uppercase">VitalityPro | Elite Training | By ycy 2026</p>
         </footer>
     </div>
 
     <div id="reward-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center p-8 backdrop-blur-xl">
         <div class="bg-slate-900 border border-slate-700 rounded-[4rem] p-12 text-center max-w-sm w-full shadow-2xl">
             <div class="text-9xl mb-8">🏆</div>
-            <h2 class="text-3xl font-black text-white mb-6 italic">今日任務達成！</h2>
+            <h2 class="text-3xl font-black text-white mb-6 italic">特訓全達成！</h2>
             <p id="reward-msg" class="text-lg text-slate-300 mb-10 leading-relaxed"></p>
-            <button onclick="closeModal()" class="w-full bg-main text-white font-black py-5 rounded-2xl shadow-xl text-xl">繼續變強</button>
+            <button onclick="closeModal()" class="w-full bg-main text-white font-black py-5 rounded-2xl shadow-xl text-xl">明天更強</button>
         </div>
     </div>
 
@@ -148,103 +157,136 @@
         let timerInterval;
         let pacingSeconds = 2.0;
         let sessionCompletedNames = [];
+        let mySchedule = JSON.parse(localStorage.getItem('vSch_ycy_2026') || "[]");
 
-        const schedule = {
-            2: { name: "胸背力量日", goal: "今日目標：強化上半身肌肉張力，讓身形更挺拔。", exercises: ["伏地挺身", "彈力繩划船", "彈力繩胸推"] },
-            4: { name: "下肢護膝日", goal: "今日目標：穩定膝關節，增加腿部深層肌力，行動如風。", exercises: ["負重深蹲", "彈力繩死硬舉", "勾腳尖蹬腿"] },
-            6: { name: "核心心肺日", goal: "今日目標：燃燒內臟脂肪，啟動全身代謝機制。", exercises: ["核心棒式", "開合跳", "二頭/三頭組合"] },
-            0: { name: "全身大挑戰", goal: "今日目標：全面體能重啟，重返巔峰活力。", exercises: ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] }
+        // 3. 男女運動強度與動作配置不同
+        const getExerciseConfig = () => {
+            const isM = currentGender === 'male';
+            return {
+                "伏地挺身": { sets: isM?3:2, reps: isM?12:8, tips: "與肩同寬，推起時吐氣，背部保持平直。" },
+                "負重深蹲": { sets: 3, reps: isM?15:12, tips: "腳踩穩，屁股像坐椅子，膝蓋不超過腳尖。" },
+                "核心棒式": { sets: 3, reps: isM?"40秒":"30秒", tips: "全身呈一線，腹部縮緊，持續穩定呼吸。" },
+                "彈力繩划船": { sets: isM?3:2, reps: isM?12:10, tips: "挺胸夾緊背部，帶子拉至腹部兩側。" },
+                "彈力繩胸推": { sets: isM?3:2, reps: isM?12:10, tips: "雙手前推感受到胸肌收縮，慢放快推。" },
+                "勾腳尖蹬腿": { sets: 3, reps: 15, tips: "用力勾起腳尖，腿部完全伸直，保護膝蓋。" },
+                "開合跳": { sets: 3, reps: isM?"40秒":"30秒", tips: "輕盈跳躍，腳尖著地緩衝，雙手過頭。" },
+                "二頭/三頭組合": { sets: isM?3:2, reps: isM?12:10, tips: "固定手肘，感受手臂肌肉緩慢收縮。" }
+            };
         };
 
-        const allExercises = {
-            "伏地挺身": { sets: 3, reps: 12, tips: "雙手寬於肩，胸貼地後推起，背部平直。" },
-            "核心棒式": { sets: 3, reps: "40秒", tips: "保持腰部平直，感受腹部緊繃，不可憋氣。" },
-            "負重深蹲": { sets: 3, reps: 12, tips: "重心在腳跟，屁股像坐椅子般下蹲。" },
-            "開合跳": { sets: 3, reps: "30秒", tips: "輕盈彈跳，腳尖著地緩衝，手要擊掌。" },
-            "彈力繩划船": { sets: 3, reps: 12, tips: "夾緊肩胛骨，帶子拉至腹部兩側。" },
-            "彈力繩死硬舉": { sets: 3, reps: 12, tips: "背挺直，由臀部發力帶起身體。" },
-            "二頭/三頭組合": { sets: 3, reps: 12, tips: "控制手肘不動，專注感受手臂肌肉收縮。" },
-            "勾腳尖蹬腿": { sets: 3, reps: 15, tips: "用力勾起腳尖，腿部完全伸直，保護膝蓋。" },
-            "彈力繩胸推": { sets: 3, reps: 12, tips: "帶子繞過背部，手向前推直，胸肌發力。" }
+        // 1. 漫威英雄數據 (5男5女)
+        const heroesPool = {
+            male: [
+                { name: "美國隊長", img: "https://i.postimg.cc/02dzjW8X/1775410232847.png", msg: "我能跟你耗上一整天！動起來！" },
+                { name: "鋼鐵人", img: "https://i.postimg.cc/2SbgTJVF/Screenshot-20260406-012721-Chrome.jpg", msg: "我愛你三千次，給我推起來！" },
+                { name: "雷神索爾", img: "https://i.postimg.cc/ZKgM9cV8/1000046561.jpg", msg: "感受力量！你值得擁有雷神之槌！" },
+                { name: "蜘蛛人", img: "https://i.postimg.cc/zDSps208/2f97an638ty71.png", msg: "能力越大責任越大！加油戰友！" },
+                { name: "浩克", img: "https://i.postimg.cc/FRxcB8mT/e034a1aa5c1f786a5be9db40149ffe63.jpg", msg: "浩克！打碎！脂肪！浩克喜歡強壯的你！" }
+            ],
+            female: [
+                { name: "黑寡婦", img: "https://i.postimg.cc/TYb22mLS/580b57fbd9996e24bc43c01f.png", msg: "肌肉是永恆的，開始特訓！" },
+                { name: "緋紅女巫", img: "https://i.postimg.cc/qBb6687z/pngtree-scarlet-witch-1980s-workout-outfit-comic-book-panel-white-background-png-image-17124607.jpg", msg: "妳可以掌控這股能量！推起來！" },
+                { name: "驚奇隊長", img: "https://i.postimg.cc/Pr1L3043/162461510278.png", msg: "更高更快更強！超越妳的極限！" },
+                { name: "舒莉", img: "https://i.postimg.cc/tCDb45CR/1775434457885.png", msg: "瓦干達萬歲！用科學的力量強化妳！" },
+                { name: "葛摩菈", img: "https://i.postimg.cc/tT0QMvDh/1775434603033.png", msg: "妳是宇宙最強的戰士。不准軟弱！" }
+            ]
         };
 
-        // 1. 更新漫威英雄數據，更換圖片連結
-        const heroes = [
-            { name: "美國隊長", img: "https://i.postimg.cc/02dzjW8X/1775410232847.png", m: "我能跟你耗上一整天！動起來！", f: "我能跟妳耗上一整天！動起來！" },
-            { name: "鋼鐵人", img: "https://i.postimg.cc/2SbgTJVF/Screenshot-20260406-012721-Chrome.jpg", m: "我愛你三千次，給我推起來！", f: "我愛妳三千次，給我推起來！" },
-            { name: "雷神索爾", img: "https://i.postimg.cc/ZKgM9cV8/1000046561.jpg", m: "感受力量！你值得擁有雷神之槌！", f: "感受力量！妳值得擁有雷神之槌！" }
-        ];
-
+        // --- 防卡死語音與計時邏輯 ---
         function speak(text, callback) {
             if (!isVoiceOn) { if(callback) callback(); return; }
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'zh-TW'; 
-            
-            // 3. Vitality 讀音優化 (微調節奏與音調)
-            if(text.includes("VitalityPro")) {
-                msg.rate = 1.0; // 唸到句子時速率稍微正常
-            } else {
-                msg.rate = 1.1; // 唸單數字或短語時速率快一點
-            }
-
-            let done = false;
-            const timer = setTimeout(() => { if(!done){ done=true; if(callback) callback(); } }, 6000);
-            msg.onend = () => { if(!done){ done=true; clearTimeout(timer); if(callback) callback(); } };
+            msg.lang = 'zh-TW'; msg.rate = 1.0;
+            let executed = false;
+            const safetyNet = setTimeout(() => { if(!executed){ executed=true; if(callback) callback(); } }, 5500);
+            msg.onend = () => { clearTimeout(safetyNet); if(!executed){ executed=true; if(callback) callback(); } };
             window.speechSynthesis.speak(msg);
         }
 
-        // --- 啟動與 2. 更新後的歡迎詞 ---
+        // 5. 更新後的歡迎詞
         function startApp() {
-            const entry = document.getElementById('entry-screen');
-            entry.style.opacity = '0';
-            setTimeout(() => { entry.style.display = 'none'; }, 800);
-            
-            // 2. 更新為溫馨熱情的開場白
-            // 3. Vitality (vaɪˋtælətɪ) 的讀音調整
-            const welcomeMsg = `歡迎來到 Vaɪ-tæl-ə-tɪ Pro，朋友們，準備好開啟充滿活力的一天嗎？`;
-            speak(welcomeMsg);
+            document.getElementById('entry-screen').style.opacity = '0';
+            setTimeout(() => document.getElementById('entry-screen').style.display = 'none', 800);
+            speak("朋友們，歡迎回來，準備好今天的特訓了嗎？");
+        }
+
+        // --- 4. 自由設定特訓日 ---
+        function selectDay(d) {
+            const idx = mySchedule.indexOf(d);
+            if(idx > -1) mySchedule.splice(idx, 1);
+            else {
+                if(mySchedule.length < 4) mySchedule.push(d);
+                else alert("每週最多特訓 4 天，保持適度休息喔！");
+            }
+            updateScheduleUI();
+        }
+
+        function updateScheduleUI() {
+            document.querySelectorAll('.day-btn').forEach((btn, i) => {
+                const dayNum = [1,2,3,4,5,6,0][i];
+                btn.className = mySchedule.includes(dayNum) ? 'day-btn active' : 'day-btn';
+            });
+        }
+
+        function confirmSchedule() {
+            localStorage.setItem('vSch_ycy_2026', JSON.stringify(mySchedule));
+            renderCalendar(); renderDailyTasks();
+            speak("特訓日程已保存。讓我們準時開戰！");
+        }
+
+        function resetSchedule() {
+            mySchedule = []; updateScheduleUI();
+            localStorage.removeItem('vSch_ycy_2026');
+            renderCalendar(); renderDailyTasks();
         }
 
         function initApp() {
-            renderCalendar();
-            renderDailyTasks();
-            updateUIStrings();
-            updateBadges();
+            updateScheduleUI(); renderCalendar(); renderDailyTasks(); updateUIStrings();
         }
 
         function updateUIStrings() {
             const u = (currentGender === 'male') ? '你' : '妳';
             document.querySelectorAll('.coach-pronoun').forEach(el => el.innerText = u);
+            const firstHero = heroesPool[currentGender][0];
+            document.getElementById('hero-img').src = firstHero.img;
         }
 
         function renderCalendar() {
             const now = new Date();
-            const history = JSON.parse(localStorage.getItem('vH_ycy_vfinal') || "[]");
+            const history = JSON.parse(localStorage.getItem('vHist_ycy_2026') || "[]");
             const container = document.getElementById('calendar-days');
             container.innerHTML = '';
             const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
             const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-
-            for (let i = 0; i < first; i++) container.innerHTML += '<div></div>';
+            for (let i = 0; i < (first === 0 ? 0 : first); i++) container.innerHTML += '<div></div>';
             for (let d = 1; d <= days; d++) {
-                const ds = new Date(now.getFullYear(), now.getMonth(), d).toLocaleDateString();
+                const dateObj = new Date(now.getFullYear(), now.getMonth(), d);
+                const ds = dateObj.toLocaleDateString();
                 const isToday = ds === new Date().toLocaleDateString();
+                const isScheduled = mySchedule.includes(dateObj.getDay());
                 const isDone = history.includes(ds);
-                const isScheduled = [0,2,4,6].includes(new Date(now.getFullYear(), now.getMonth(), d).getDay());
                 container.innerHTML += `<div class="calendar-day ${isToday ? 'today-mark' : ''} ${isScheduled ? 'workout-day' : ''} ${isDone ? 'done-history' : ''}">${d}</div>`;
             }
         }
 
         function renderDailyTasks() {
-            const day = new Date().getDay();
-            const taskInfo = schedule[day] || { name: "修復日", goal: "適當休息是為了走更長遠的路。", exercises: [] };
-            document.getElementById('daily-goal-text').innerText = taskInfo.goal;
+            const dayNum = new Date().getDay();
             const listEl = document.getElementById('daily-task-list');
             listEl.innerHTML = '';
+
+            if(!mySchedule.includes(dayNum)) {
+                document.getElementById('daily-goal-text').innerText = "今日為身體修復日。休息也是訓練的一部分！";
+                return;
+            }
+
+            document.getElementById('daily-goal-text').innerText = "今日目標：啟動核心肌群，燃燒多餘熱量，打造英雄般的體態。";
+            const isM = currentGender === 'male';
+            const exNames = isM ? ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] : ["勾腳尖蹬腿", "彈力繩胸推", "核心棒式", "二頭/三頭組合"];
             
-            taskInfo.exercises.forEach(name => {
-                const ex = allExercises[name];
+            const configs = getExerciseConfig();
+            exNames.forEach(name => {
+                const ex = configs[name];
                 const isDone = sessionCompletedNames.includes(name);
                 const card = document.createElement('div');
                 card.className = `glass p-8 rounded-[3rem] task-card ${isDone ? 'completed' : ''}`;
@@ -252,9 +294,9 @@
                     <div class="flex justify-between items-start mb-6">
                         <div><h4 class="font-black text-white text-2xl mb-1">${name}</h4>
                         <p class="text-base text-main font-bold uppercase tracking-widest">${ex.sets} 組 ∙ ${ex.reps}</p></div>
-                        <button onclick="runEx('${name}')" class="bg-slate-700 text-white text-sm font-black px-6 py-3 rounded-full uppercase active:scale-90">開始訓練</button>
+                        <button onclick="runEx('${name}')" class="bg-slate-700 text-white text-xs font-black px-6 py-3 rounded-full uppercase active:scale-90">開始特訓</button>
                     </div>
-                    <p class="text-base text-slate-300 mb-8 leading-relaxed">動作要領：${ex.tips}</p>
+                    <p class="text-base text-slate-300 mb-8 leading-relaxed italic">動作要領：${ex.tips}</p>
                     <button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] border border-slate-700 text-base font-black uppercase ${isDone ? 'bg-emerald-500 text-white border-none' : 'text-slate-500'}">
                         ${isDone ? '✅ 任務已達成' : '點擊確認完成此項'}
                     </button>
@@ -263,35 +305,33 @@
             });
         }
 
-        // 1. 開始訓練時更新圖片 src
         function runEx(name) {
             if(workoutState !== 'IDLE') return;
-            const hero = heroes[Math.floor(Math.random() * heroes.length)];
-            const ex = allExercises[name];
+            const pool = heroesPool[currentGender];
+            const hero = pool[Math.floor(Math.random() * pool.length)];
+            const ex = getExerciseConfig()[name];
             
-            // 更換圖片而不是 Emoji
             document.getElementById('hero-img').src = hero.img;
-            document.getElementById('hero-img').alt = hero.name;
-            
             document.getElementById('action-coach-name').innerText = "教練：" + hero.name;
             document.getElementById('action-title').innerText = name;
             
-            speak(currentGender === 'male' ? hero.m : hero.f, () => {
+            speak(hero.msg, () => {
                 workoutState = 'WORKING'; setCounter = 1; startSet(name);
             });
         }
 
         function startSet(name) {
-            const ex = allExercises[name];
+            const ex = getExerciseConfig()[name];
             repCounter = 0;
             document.getElementById('display-val').innerText = "0";
             speak(`第 ${setCounter} 組，開始！`, () => {
-                if(typeof ex.reps === 'number') countReps(ex.reps, name);
-                else countTime(parseInt(ex.reps), name);
+                if(ex.reps.includes("秒")) countTime(parseInt(ex.reps), name);
+                else countReps(ex.reps, name);
             });
         }
 
         function countReps(max, name) {
+            if (workoutState !== 'WORKING') return;
             if (repCounter < max) {
                 repCounter++; document.getElementById('display-val').innerText = repCounter;
                 speak(`${repCounter}`);
@@ -309,12 +349,12 @@
         }
 
         function nextStep(name) {
-            const ex = allExercises[name];
+            const ex = getExerciseConfig()[name];
             if (setCounter < ex.sets) {
                 workoutState = 'RESTING'; let r = 30;
                 document.getElementById('display-val').innerText = r;
                 document.getElementById('timer-progress').style.stroke = "#10b981";
-                speak("漂亮！休息三十秒。");
+                speak("休息三十秒。");
                 timerInterval = setInterval(() => {
                     r--; document.getElementById('display-val').innerText = r;
                     if(r <= 0) { 
@@ -324,55 +364,43 @@
                     }
                 }, 1000);
             } else {
-                workoutState = 'IDLE'; speak("這項動作完成了！快按確認按鈕領取星星。");
+                workoutState = 'IDLE'; speak("這項完成了！記得點擊確認。");
             }
         }
 
         function confirmItem(name) {
             if(!sessionCompletedNames.includes(name)) sessionCompletedNames.push(name);
             renderDailyTasks();
-            const total = (schedule[new Date().getDay()] || {exercises:[]}).exercises.length;
-            if(sessionCompletedNames.length === total && total > 0) {
-                const h = JSON.parse(localStorage.getItem('vH_ycy_vfinal') || "[]");
+            if(sessionCompletedNames.length === 4) {
+                const history = JSON.parse(localStorage.getItem('vHist_ycy_2026') || "[]");
                 const ds = new Date().toLocaleDateString();
-                if(!h.includes(ds)) {
-                    h.push(ds); localStorage.setItem('vH_ycy_vfinal', JSON.stringify(h));
-                    renderCalendar(); updateBadges(); showPop();
+                if(!history.includes(ds)) {
+                    history.push(ds); localStorage.setItem('vHist_ycy_2026', JSON.stringify(history));
+                    renderCalendar(); showPop();
                 }
             }
         }
 
         function showPop() {
             const u = (currentGender === 'male') ? '你' : '妳';
-            const history = JSON.parse(localStorage.getItem('vH_ycy_vfinal') || "[]");
-            let msg = `${u}完成了今日特訓！朋友們為${u}感到驕傲，英雄之血在${u}體內沸騰！By ycy`;
-            if(history.length >= 15) msg = `${u}就是傳傳復仇者！15 天全勤達成！By ycy`;
+            const msg = `${u}完成了今日特訓！朋友們為${u}感到驕傲！By ycy 2026`;
             document.getElementById('reward-msg').innerText = msg;
             document.getElementById('reward-modal').classList.remove('hidden');
             speak(msg);
-        }
-
-        function updateBadges() {
-            const count = JSON.parse(localStorage.getItem('vH_ycy_vfinal') || "[]").length;
-            if(count >= 5) document.getElementById('badge-5').classList.remove('opacity-10', 'grayscale');
-            if(count >= 10) document.getElementById('badge-10').classList.remove('opacity-10', 'grayscale');
-            if(count >= 15) document.getElementById('badge-15').classList.remove('opacity-10', 'grayscale');
         }
 
         function toggleGender() {
             currentGender = currentGender === 'male' ? 'female' : 'male';
             document.getElementById('app-body').className = 'pb-20 theme-' + currentGender;
             document.getElementById('gender-btn').innerText = `切換模式 (目前:${currentGender==='male'?'男':'女'}性)`;
-            sessionCompletedNames = [];
-            initApp();
+            sessionCompletedNames = []; initApp();
         }
 
         function updatePacing(val) { pacingSeconds = parseFloat(val); document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s"; }
         function toggleVoice() { isVoiceOn = !isVoiceOn; document.getElementById('voice-toggle').innerText = isVoiceOn ? '🔊' : '🔇'; }
         function closeModal() { document.getElementById('reward-modal').classList.add('hidden'); }
-        function clearHistory() { if(confirm("重置數據？")) { localStorage.clear(); location.reload(); } }
 
-        initApp();
+        window.onload = initApp;
     </script>
 </body>
 </html>
