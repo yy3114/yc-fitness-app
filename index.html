@@ -16,7 +16,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #0b1120; color: #f8fafc; -webkit-tap-highlight-color: transparent; transition: background 0.5s; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 性別主題顏色：男性藍 / 櫻花淡粉 */
         .theme-male { --main: #3b82f6; --accent: #1d4ed8; }
         .theme-female { --main: #f472b6; --accent: #db2777; }
         
@@ -25,7 +24,7 @@
         .border-main { border-color: var(--main); }
         
         .today-mark { background: #ef4444 !important; color: white !important; border-radius: 50%; font-weight: 900; }
-        .workout-day { border: 2.5px solid var(--main); border-radius: 50%; }
+        .workout-day { border: 2px solid var(--main); border-radius: 50%; }
         
         .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; color: #475569; font-size: 14px; }
         .done-history::after { content: '⭐'; position: absolute; bottom: -2px; right: -2px; font-size: 10px; color: #f59e0b; }
@@ -34,8 +33,7 @@
         .task-card { border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s; }
         .task-card.completed { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
 
-        /* 星期選取按鈕 */
-        .day-btn { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; transition: all 0.2s; }
+        .day-btn { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; transition: all 0.2s; color: #475569; }
         .day-btn.active { background-color: var(--main); color: white; border-color: var(--main); box-shadow: 0 0 15px var(--main); }
 
         #entry-screen { position: fixed; inset: 0; z-index: 100; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; transition: opacity 0.8s ease; }
@@ -60,7 +58,7 @@
                 <h1 class="text-3xl font-black tracking-tighter italic text-white">
                     Vitality<span class="text-main">PRO</span><span class="text-sm font-normal text-slate-500 not-italic ml-2">by ycy</span>
                 </h1>
-                <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-2xl shadow-lg">🔊</button>
+                <button onclick="toggleVoice()" id="voice-toggle" class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-2xl">🔊</button>
             </div>
             
             <div class="space-y-5">
@@ -103,7 +101,7 @@
             </p>
             
             <div class="flex justify-center mb-8">
-                <div class="w-32 h-32 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl transition-all duration-500">
+                <div class="w-32 h-32 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl">
                     <img id="hero-img" src="https://i.postimg.cc/02dzjW8X/1775410232847.png" class="w-full h-full object-cover">
                 </div>
             </div>
@@ -118,7 +116,7 @@
                         <span id="display-val" class="text-7xl font-black italic tracking-tighter">--</span>
                     </div>
                 </div>
-                <h3 id="action-title" class="text-2xl font-black mb-2 text-white uppercase italic tracking-tighter">Assemble</h3>
+                <h3 id="action-title" class="text-2xl font-black mb-2 text-white uppercase italic">Assemble</h3>
                 <p id="action-coach-name" class="text-base text-slate-400 italic">選取動作任務</p>
             </div>
         </section>
@@ -134,7 +132,7 @@
         </div>
 
         <footer class="text-center py-10 border-t border-slate-800">
-            <p class="text-sm text-slate-600 font-bold tracking-widest uppercase">VitalityPro | Elite Training | By ycy 2026</p>
+            <p class="text-sm text-slate-600 font-bold tracking-widest uppercase">VitalityPro | Elite Coaching | By ycy 2026</p>
         </footer>
     </div>
 
@@ -157,9 +155,8 @@
         let timerInterval;
         let pacingSeconds = 2.0;
         let sessionCompletedNames = [];
-        let mySchedule = JSON.parse(localStorage.getItem('vSch_ycy_2026') || "[]");
+        let mySchedule = JSON.parse(localStorage.getItem('vSch_ycy_v2') || "[]");
 
-        // 3. 男女運動強度與動作配置不同
         const getExerciseConfig = () => {
             const isM = currentGender === 'male';
             return {
@@ -169,19 +166,17 @@
                 "彈力繩划船": { sets: isM?3:2, reps: isM?12:10, tips: "挺胸夾緊背部，帶子拉至腹部兩側。" },
                 "彈力繩胸推": { sets: isM?3:2, reps: isM?12:10, tips: "雙手前推感受到胸肌收縮，慢放快推。" },
                 "勾腳尖蹬腿": { sets: 3, reps: 15, tips: "用力勾起腳尖，腿部完全伸直，保護膝蓋。" },
-                "開合跳": { sets: 3, reps: isM?"40秒":"30秒", tips: "輕盈跳躍，腳尖著地緩衝，雙手過頭。" },
                 "二頭/三頭組合": { sets: isM?3:2, reps: isM?12:10, tips: "固定手肘，感受手臂肌肉緩慢收縮。" }
             };
         };
 
-        // 1. 漫威英雄數據 (5男5女)
         const heroesPool = {
             male: [
                 { name: "美國隊長", img: "https://i.postimg.cc/02dzjW8X/1775410232847.png", msg: "我能跟你耗上一整天！動起來！" },
                 { name: "鋼鐵人", img: "https://i.postimg.cc/2SbgTJVF/Screenshot-20260406-012721-Chrome.jpg", msg: "我愛你三千次，給我推起來！" },
                 { name: "雷神索爾", img: "https://i.postimg.cc/ZKgM9cV8/1000046561.jpg", msg: "感受力量！你值得擁有雷神之槌！" },
-                { name: "蜘蛛人", img: "https://i.postimg.cc/zDSps208/2f97an638ty71.png", msg: "能力越大責任越大！加油戰友！" },
-                { name: "浩克", img: "https://i.postimg.cc/FRxcB8mT/e034a1aa5c1f786a5be9db40149ffe63.jpg", msg: "浩克！打碎！脂肪！浩克喜歡強壯的你！" }
+                { name: "蜘蛛人", img: "https://i.postimg.cc/zDSps208/2f97an638ty71.png", msg: "能力越大責任越大！加油！" },
+                { name: "浩克", img: "https://i.postimg.cc/FRxcB8mT/e034a1aa5c1f786a5be9db40149ffe63.jpg", msg: "浩克！打碎脂肪！浩克喜歡強壯的你！" }
             ],
             female: [
                 { name: "黑寡婦", img: "https://i.postimg.cc/TYb22mLS/580b57fbd9996e24bc43c01f.png", msg: "肌肉是永恆的，開始特訓！" },
@@ -192,33 +187,28 @@
             ]
         };
 
-        // --- 防卡死語音與計時邏輯 ---
         function speak(text, callback) {
             if (!isVoiceOn) { if(callback) callback(); return; }
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'zh-TW'; msg.rate = 1.0;
             let executed = false;
-            const safetyNet = setTimeout(() => { if(!executed){ executed=true; if(callback) callback(); } }, 5500);
+            const safetyNet = setTimeout(() => { if(!executed){ executed=true; if(callback) callback(); } }, 5000);
             msg.onend = () => { clearTimeout(safetyNet); if(!executed){ executed=true; if(callback) callback(); } };
             window.speechSynthesis.speak(msg);
         }
 
-        // 5. 更新後的歡迎詞
         function startApp() {
             document.getElementById('entry-screen').style.opacity = '0';
             setTimeout(() => document.getElementById('entry-screen').style.display = 'none', 800);
             speak("朋友們，歡迎回來，準備好今天的特訓了嗎？");
         }
 
-        // --- 4. 自由設定特訓日 ---
         function selectDay(d) {
             const idx = mySchedule.indexOf(d);
             if(idx > -1) mySchedule.splice(idx, 1);
-            else {
-                if(mySchedule.length < 4) mySchedule.push(d);
-                else alert("每週最多特訓 4 天，保持適度休息喔！");
-            }
+            else if(mySchedule.length < 4) mySchedule.push(d);
+            else alert("每週最多特訓 4 天喔！");
             updateScheduleUI();
         }
 
@@ -230,14 +220,14 @@
         }
 
         function confirmSchedule() {
-            localStorage.setItem('vSch_ycy_2026', JSON.stringify(mySchedule));
+            localStorage.setItem('vSch_ycy_v2', JSON.stringify(mySchedule));
             renderCalendar(); renderDailyTasks();
-            speak("特訓日程已保存。讓我們準時開戰！");
+            speak("日程已更新，準備戰鬥！");
         }
 
         function resetSchedule() {
             mySchedule = []; updateScheduleUI();
-            localStorage.removeItem('vSch_ycy_2026');
+            localStorage.removeItem('vSch_ycy_v2');
             renderCalendar(); renderDailyTasks();
         }
 
@@ -248,18 +238,17 @@
         function updateUIStrings() {
             const u = (currentGender === 'male') ? '你' : '妳';
             document.querySelectorAll('.coach-pronoun').forEach(el => el.innerText = u);
-            const firstHero = heroesPool[currentGender][0];
-            document.getElementById('hero-img').src = firstHero.img;
+            document.getElementById('hero-img').src = heroesPool[currentGender][0].img;
         }
 
         function renderCalendar() {
             const now = new Date();
-            const history = JSON.parse(localStorage.getItem('vHist_ycy_2026') || "[]");
+            const history = JSON.parse(localStorage.getItem('vHist_ycy_v2') || "[]");
             const container = document.getElementById('calendar-days');
             container.innerHTML = '';
             const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
             const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            for (let i = 0; i < (first === 0 ? 0 : first); i++) container.innerHTML += '<div></div>';
+            for (let i = 0; i < (first === 0 ? 6 : first - 1); i++) container.innerHTML += '<div></div>';
             for (let d = 1; d <= days; d++) {
                 const dateObj = new Date(now.getFullYear(), now.getMonth(), d);
                 const ds = dateObj.toLocaleDateString();
@@ -271,19 +260,15 @@
         }
 
         function renderDailyTasks() {
-            const dayNum = new Date().getDay();
+            const todayNum = new Date().getDay();
             const listEl = document.getElementById('daily-task-list');
             listEl.innerHTML = '';
-
-            if(!mySchedule.includes(dayNum)) {
+            if(!mySchedule.includes(todayNum)) {
                 document.getElementById('daily-goal-text').innerText = "今日為身體修復日。休息也是訓練的一部分！";
                 return;
             }
-
-            document.getElementById('daily-goal-text').innerText = "今日目標：啟動核心肌群，燃燒多餘熱量，打造英雄般的體態。";
-            const isM = currentGender === 'male';
-            const exNames = isM ? ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] : ["勾腳尖蹬腿", "彈力繩胸推", "核心棒式", "二頭/三頭組合"];
-            
+            document.getElementById('daily-goal-text').innerText = "今日目標：啟動核心肌群，燃燒多餘熱量，打造英雄體態。";
+            const exNames = currentGender === 'male' ? ["伏地挺身", "負重深蹲", "彈力繩划船", "核心棒式"] : ["勾腳尖蹬腿", "彈力繩胸推", "核心棒式", "二頭/三頭組合"];
             const configs = getExerciseConfig();
             exNames.forEach(name => {
                 const ex = configs[name];
@@ -294,7 +279,7 @@
                     <div class="flex justify-between items-start mb-6">
                         <div><h4 class="font-black text-white text-2xl mb-1">${name}</h4>
                         <p class="text-base text-main font-bold uppercase tracking-widest">${ex.sets} 組 ∙ ${ex.reps}</p></div>
-                        <button onclick="runEx('${name}')" class="bg-slate-700 text-white text-xs font-black px-6 py-3 rounded-full uppercase active:scale-90">開始特訓</button>
+                        <button onclick="runEx('${name}')" class="bg-slate-700 text-white text-xs font-black px-6 py-3 rounded-full uppercase">開始特訓</button>
                     </div>
                     <p class="text-base text-slate-300 mb-8 leading-relaxed italic">動作要領：${ex.tips}</p>
                     <button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] border border-slate-700 text-base font-black uppercase ${isDone ? 'bg-emerald-500 text-white border-none' : 'text-slate-500'}">
@@ -307,23 +292,17 @@
 
         function runEx(name) {
             if(workoutState !== 'IDLE') return;
-            const pool = heroesPool[currentGender];
-            const hero = pool[Math.floor(Math.random() * pool.length)];
+            const hero = heroesPool[currentGender][Math.floor(Math.random() * 5)];
             const ex = getExerciseConfig()[name];
-            
             document.getElementById('hero-img').src = hero.img;
             document.getElementById('action-coach-name').innerText = "教練：" + hero.name;
             document.getElementById('action-title').innerText = name;
-            
-            speak(hero.msg, () => {
-                workoutState = 'WORKING'; setCounter = 1; startSet(name);
-            });
+            speak(hero.msg, () => { workoutState = 'WORKING'; setCounter = 1; startSet(name); });
         }
 
         function startSet(name) {
             const ex = getExerciseConfig()[name];
-            repCounter = 0;
-            document.getElementById('display-val').innerText = "0";
+            repCounter = 0; document.getElementById('display-val').innerText = "0";
             speak(`第 ${setCounter} 組，開始！`, () => {
                 if(ex.reps.includes("秒")) countTime(parseInt(ex.reps), name);
                 else countReps(ex.reps, name);
@@ -357,32 +336,27 @@
                 speak("休息三十秒。");
                 timerInterval = setInterval(() => {
                     r--; document.getElementById('display-val').innerText = r;
-                    if(r <= 0) { 
-                        clearInterval(timerInterval); setCounter++; 
-                        document.getElementById('timer-progress').style.stroke = "currentColor";
-                        startSet(name); 
-                    }
+                    if(r <= 0) { clearInterval(timerInterval); setCounter++; document.getElementById('timer-progress').style.stroke = "currentColor"; startSet(name); }
                 }, 1000);
-            } else {
-                workoutState = 'IDLE'; speak("這項完成了！記得點擊確認。");
-            }
+            } else { workoutState = 'IDLE'; speak("這項完成了！記得點擊確認。"); }
         }
 
         function confirmItem(name) {
             if(!sessionCompletedNames.includes(name)) sessionCompletedNames.push(name);
             renderDailyTasks();
-            if(sessionCompletedNames.length === 4) {
-                const history = JSON.parse(localStorage.getItem('vHist_ycy_2026') || "[]");
+            const exCount = currentGender === 'male' ? 4 : 4; 
+            if(sessionCompletedNames.length === exCount) {
+                const history = JSON.parse(localStorage.getItem('vHist_ycy_v2') || "[]");
                 const ds = new Date().toLocaleDateString();
                 if(!history.includes(ds)) {
-                    history.push(ds); localStorage.setItem('vHist_ycy_2026', JSON.stringify(history));
+                    history.push(ds); localStorage.setItem('vHist_ycy_v2', JSON.stringify(history));
                     renderCalendar(); showPop();
                 }
             }
         }
 
         function showPop() {
-            const u = (currentGender === 'male') ? '你' : '妳';
+            const u = currentGender === 'male' ? '你' : '妳';
             const msg = `${u}完成了今日特訓！朋友們為${u}感到驕傲！By ycy 2026`;
             document.getElementById('reward-msg').innerText = msg;
             document.getElementById('reward-modal').classList.remove('hidden');
