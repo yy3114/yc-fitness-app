@@ -15,7 +15,7 @@
         .text-main { color: var(--main); }
         
         .task-card { border: 2px solid transparent; transition: all 0.4s ease; background: rgba(30, 41, 59, 0.4); }
-        .task-card.active-now { border-color: var(--main); box-shadow: 0 0 25px var(--main); transform: scale(1.02); }
+        .task-card.active-now { border-color: var(--main); box-shadow: 0 0 25px var(--main); transform: scale(1.02); background: rgba(255, 255, 255, 0.05); }
         .task-card.completed { border-color: #10b981 !important; background: rgba(16, 185, 129, 0.15) !important; opacity: 0.8; }
         
         .btn-confirm-locked { background: #1e293b; color: #475569; pointer-events: none; }
@@ -27,14 +27,14 @@
         .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 14px; }
         .done-history::after { content: '⭐'; position: absolute; bottom: -2px; right: -2px; font-size: 10px; color: #f59e0b; }
         
-        .day-btn { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; transition: 0.2s; color: #475569; }
+        .day-btn { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; transition: 0.2s; color: #475569; }
         .day-btn.active { background-color: var(--main); color: white; border-color: var(--main); }
         
         #entry-screen { position: fixed; inset: 0; z-index: 2000; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .progress-ring { transition: stroke-dashoffset 0.3s; transform: rotate(-90deg); transform-origin: 50% 50%; }
         
         input[type=range] { -webkit-appearance: none; width: 100%; background: #1e293b; height: 12px; border-radius: 10px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 26px; width: 26px; border-radius: 50%; background: var(--main); cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 28px; width: 28px; border-radius: 50%; background: var(--main); cursor: pointer; box-shadow: 0 0 15px rgba(0,0,0,0.5); border: 2px solid white; }
     </style>
 </head>
 <body class="pb-24 theme-male" id="app-body">
@@ -57,19 +57,13 @@
         </header>
 
         <div class="glass p-6 rounded-[2.5rem] mb-10 border border-slate-700 text-center">
-            <h4 class="text-sm font-black text-main uppercase tracking-widest mb-6 italic">設定每週特訓日 (最多4天)</h4>
-            <div class="flex justify-between mb-8" id="picker-row">
-                <button class="day-btn" data-day="1" onclick="selectDay(1)">一</button>
-                <button class="day-btn" data-day="2" onclick="selectDay(2)">二</button>
-                <button class="day-btn" data-day="3" onclick="selectDay(3)">三</button>
-                <button class="day-btn" data-day="4" onclick="selectDay(4)">四</button>
-                <button class="day-btn" data-day="5" onclick="selectDay(5)">五</button>
-                <button class="day-btn" data-day="6" onclick="selectDay(6)">六</button>
-                <button class="day-btn" data-day="0" onclick="selectDay(0)">日</button>
+            <h4 class="text-sm font-black text-main uppercase tracking-widest mb-6 italic">設定特訓日 (最多4天)</h4>
+            <div class="flex justify-between mb-8">
+                <button class="day-btn" data-day="1" onclick="selectDay(1)">一</button><button class="day-btn" data-day="2" onclick="selectDay(2)">二</button><button class="day-btn" data-day="3" onclick="selectDay(3)">三</button><button class="day-btn" data-day="4" onclick="selectDay(4)">四</button><button class="day-btn" data-day="5" onclick="selectDay(5)">五</button><button class="day-btn" data-day="6" onclick="selectDay(6)">六</button><button class="day-btn" data-day="0" onclick="selectDay(0)">日</button>
             </div>
             <div class="flex gap-4">
-                <button onclick="confirmSchedule()" class="flex-1 bg-main py-4 rounded-2xl font-black text-sm text-white shadow-lg">確定設定</button>
-                <button onclick="resetSchedule()" class="flex-1 bg-slate-800 py-4 rounded-2xl font-black text-sm text-slate-400">重設</button>
+                <button onclick="confirmSchedule()" class="flex-1 bg-main py-4 rounded-2xl font-black text-xs text-white shadow-lg">確定設定</button>
+                <button onclick="resetSchedule()" class="flex-1 bg-slate-800 py-4 rounded-2xl font-black text-xs text-slate-400">重設</button>
             </div>
         </div>
 
@@ -84,9 +78,8 @@
 
         <section class="bg-slate-800/30 rounded-[3.5rem] p-10 text-white shadow-2xl relative border border-slate-700/50 mb-12 text-center">
             <p class="text-3xl font-black text-main uppercase tracking-widest mb-8"><span class="coach-p">你</span>今天的教練</p>
-            
             <div class="flex justify-center mb-8">
-                <div class="w-40 h-40 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl">
+                <div class="w-44 h-44 rounded-full border-4 border-slate-700 bg-slate-900 overflow-hidden shadow-2xl">
                     <img id="hero-img" src="https://i.postimg.cc/nh2CXY5r/1775410232847.png" class="w-full h-full object-cover">
                 </div>
             </div>
@@ -108,7 +101,7 @@
                 <span id="pacing-val" class="text-2xl font-black text-main tracking-tighter">2.0s</span>
             </div>
             <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" oninput="updatePacing(this.value)">
-            <p class="text-[10px] text-slate-500 mt-3 text-center uppercase font-bold tracking-widest">向右滑動放慢「數下」的速度</p>
+            <p class="text-[10px] text-slate-500 mt-3 text-center uppercase font-bold tracking-widest">滑動調整「數數」的速度</p>
         </div>
 
         <footer class="text-center py-12 border-t border-slate-800">
@@ -134,7 +127,7 @@
         let repCounter = 0;
         let timerId = null;
         let pacingSeconds = 2.0;
-        let scheduleDays = JSON.parse(localStorage.getItem('vSch_ycy_v2026_FINAL_STRICT')) || [];
+        let scheduleDays = JSON.parse(localStorage.getItem('vSch_ycy_v2026_FINAL_V6')) || [];
         let completedActions = [];
         let unlockedActions = []; 
 
@@ -144,7 +137,7 @@
                 { name: "鋼鐵人", img: "https://i.postimg.cc/qv1vJBh7/Screenshot-20260406-012721-Chrome.jpg", msg: "我愛你三千次，給我推起來！" },
                 { name: "雷神索爾", img: "https://i.postimg.cc/fysN71tj/1000046561.jpg", msg: "感受力量！你值得擁有雷神之槌！" },
                 { name: "蜘蛛人", img: "https://i.postimg.cc/Bb4rPDkN/2f97an638ty71.png", msg: "能力越大責任越大！加油戰友！" },
-                { name: "浩克", img: "https://i.postimg.cc/mDGqKCLW/e034a1aa5c1f786a5be9db40149ffe63.jpg", msg: "浩克！打碎脂肪！浩克喜歡你！" }
+                { name: "浩克", img: "https://i.postimg.cc/mDGqKCLW/e034a1aa5c1f786a5be9db40149ffe63.jpg", msg: "浩克！打碎脂肪！浩克喜歡強壯的你！" }
             ],
             female: [
                 { name: "黑寡婦", img: "https://i.postimg.cc/15TvLwBb/580b57fbd9996e24bc43c01f.png", msg: "肌肉是永恆的，開始特訓！" },
@@ -169,13 +162,18 @@
             };
         };
 
-        const encouragements = ["加油，妳可以的！", "朋友們，英雄就是這樣煉成的！", "做得好，感受肌肉在跳動！", "堅持下去，不准軟弱！"];
+        const encouragements = [
+            "加油，妳可以的！", "朋友們，英雄就是這樣煉成的！", "做得好，感受肌肉在跳動！", 
+            "堅持下去，不准軟弱！", "妳的努力，身體會給妳答案！", "保持呼吸，妳是最棒的！",
+            "為了更強大的自己，再撐一下！", "朋友們，我們一起戰鬥到最後！"
+        ];
 
         function speak(text) {
             if (!isVoiceOn) return;
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'zh-TW'; window.speechSynthesis.speak(msg);
+            msg.lang = 'zh-TW'; 
+            window.speechSynthesis.speak(msg);
         }
 
         function clearAllTimers() { clearInterval(timerId); clearTimeout(timerId); timerId = null; }
@@ -198,11 +196,12 @@
             document.getElementById('action-title').innerText = name;
             renderDailyTasks();
 
-            speak(`${hero.msg}。接下來是${name}，共${ex.sets}組，每組${ex.reps}${ex.unit}。動作要領：${ex.tips}。朋友們，如果覺得太快或太慢，可以在下方調整動作快慢喔！`);
+            // --- 修正：加長語音與等待時間 (15秒) ---
+            speak(`${hero.msg}。接下來是${name}，共${ex.sets}組，每組${ex.reps}${ex.unit}。動作要領：${ex.tips}。朋友們，如果覺得太快或太慢，可以在下方調整動作快慢喔！第一組準備...`);
             
             workoutState = 'WORKING';
             setCounter = 1;
-            timerId = setTimeout(() => startSetCycle(name), 10500);
+            timerId = setTimeout(() => startSetCycle(name), 15000); 
         }
 
         function startSetCycle(name) {
@@ -247,8 +246,11 @@
                 let restTime = 30;
                 document.getElementById('display-val').innerText = restTime;
                 document.getElementById('timer-progress').style.stroke = "#10b981";
+                
+                // --- 修正：休息時增加速度提醒與隨機打氣 ---
                 const enc = encouragements[Math.floor(Math.random() * encouragements.length)];
-                speak(`休息三十秒。現在重複動作要領：${ex.tips}。${enc}`);
+                speak(`休息三十秒。現在重複動作要領：${ex.tips}。別忘了下方可以調整數數節奏。${enc}`);
+                
                 timerId = setInterval(() => {
                     restTime--;
                     document.getElementById('display-val').innerText = restTime;
@@ -259,7 +261,7 @@
                 activeExName = null;
                 unlockedActions.push(name);
                 renderDailyTasks();
-                speak("這項任務完成了！朋友們，請點擊確認按鈕。");
+                speak("這項任務完成了！妳真棒，朋友們，請點擊確認按鈕。");
             }
         }
 
@@ -268,13 +270,14 @@
             if (!completedActions.includes(name)) completedActions.push(name);
             renderDailyTasks();
             if (completedActions.length === 4) {
-                const history = JSON.parse(localStorage.getItem('vHist_ycy_strict_final_v2')) || [];
+                const history = JSON.parse(localStorage.getItem('vHist_ycy_strict_final_v6')) || [];
                 const ds = new Date().toLocaleDateString();
                 if (!history.includes(ds)) {
-                    history.push(ds); localStorage.setItem('vHist_ycy_strict_final_v2', JSON.stringify(history));
+                    history.push(ds); localStorage.setItem('vHist_ycy_strict_final_v6', JSON.stringify(history));
                     renderCalendar();
                     document.getElementById('reward-msg').innerText = `${currentGender==='male'?'你':'妳'}完成了今日特訓！By ycy 2026`;
                     document.getElementById('reward-modal').classList.remove('hidden');
+                    speak("特訓全達成！朋友們，妳是真正的英雄！");
                 }
             }
         }
@@ -297,7 +300,7 @@
                 const isUnlocked = unlockedActions.includes(name);
                 const card = document.createElement('div');
                 card.className = `glass p-8 rounded-[3rem] task-card ${isDone?'completed':''} ${isActive?'active-now':''}`;
-                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h4 class="font-black text-white text-2xl">${name}</h4><p class="text-base text-main uppercase font-bold tracking-widest">${ex.sets}組 ∙ ${ex.reps}${ex.unit}</p></div><button onclick="runEx('${name}')" class="bg-slate-700 text-white text-sm font-black px-6 py-3 rounded-full active:scale-95">開始訓練</button></div><p class="text-base text-slate-300 mb-8 italic">動作要領：${ex.tips}</p><button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] font-black uppercase text-lg ${isDone?'bg-emerald-500 text-white':(isUnlocked?'btn-confirm-unlocked':'btn-confirm-locked')}">${isDone?'✅ 任務達成':(isUnlocked?'點擊確認完成':'運動三組後解鎖')}</button>`;
+                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h4 class="font-black text-white text-2xl">${name}</h4><p class="text-base text-main uppercase font-bold tracking-widest">${ex.sets}組 ∙ ${ex.reps}${ex.unit}</p></div><button onclick="runEx('${name}')" class="bg-slate-700 text-white text-sm font-black px-6 py-3 rounded-full active:scale-95">開始訓練</button></div><p class="text-base text-slate-300 mb-8 italic">動作要領：${ex.tips}</p><button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] font-black uppercase text-lg ${isDone?'bg-emerald-500 text-white':(isUnlocked?'bg-main text-white':'btn-confirm-locked')}">${isDone?'✅ 任務達成':(isUnlocked?'點擊確認完成':'運動三組後解鎖')}</button>`;
                 listEl.appendChild(card);
             });
         }
@@ -305,12 +308,12 @@
         function updatePacing(val) { pacingSeconds = parseFloat(val); document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s"; }
         function selectDay(d) { const idx = scheduleDays.indexOf(d); if (idx > -1) scheduleDays.splice(idx, 1); else if (scheduleDays.length < 4) scheduleDays.push(d); updatePickerUI(); }
         function updatePickerUI() { document.querySelectorAll('.day-btn').forEach((btn, i) => { const d = [1,2,3,4,5,6,0][i]; btn.className = scheduleDays.includes(d) ? 'day-btn active' : 'day-btn'; }); }
-        function confirmSchedule() { localStorage.setItem('vSch_ycy_final_strict', JSON.stringify(scheduleDays)); renderCalendar(); renderDailyTasks(); speak("排程保存完成。"); }
-        function resetSchedule() { scheduleDays = []; localStorage.removeItem('vSch_ycy_final_strict'); updatePickerUI(); renderCalendar(); renderDailyTasks(); }
+        function confirmSchedule() { localStorage.setItem('vSch_ycy_v2026_FINAL_V6', JSON.stringify(scheduleDays)); renderCalendar(); renderDailyTasks(); speak("排程保存完成。"); }
+        function resetSchedule() { scheduleDays = []; localStorage.removeItem('vSch_ycy_v2026_FINAL_V6'); updatePickerUI(); renderCalendar(); renderDailyTasks(); }
 
         function renderCalendar() {
             const now = new Date();
-            const history = JSON.parse(localStorage.getItem('vHist_ycy_strict_final_v2')) || [];
+            const history = JSON.parse(localStorage.getItem('vHist_ycy_strict_final_v6')) || [];
             const container = document.getElementById('calendar-days');
             container.innerHTML = '';
             const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
