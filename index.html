@@ -27,7 +27,7 @@
         .calendar-day { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 14px; }
         .done-history::after { content: '⭐'; position: absolute; bottom: -2px; right: -2px; font-size: 10px; color: #f59e0b; }
         
-        .day-btn { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; transition: 0.2s; color: #475569; }
+        .day-btn { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #334155; font-size: 13px; font-weight: 900; color: #475569; transition: 0.2s; }
         .day-btn.active { background-color: var(--main); color: white; border-color: var(--main); }
         
         #entry-screen { position: fixed; inset: 0; z-index: 2000; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -74,7 +74,7 @@
         </div>
 
         <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 mb-8 text-center">
-            <h4 class="text-sm font-black text-main mb-2 tracking-widest uppercase">今天的目標</h4>
+            <h4 class="text-sm font-black text-main mb-2 uppercase tracking-widest">今天的目標</h4>
             <p id="daily-goal-text" class="text-lg text-slate-200 font-bold italic">等待排程設定...</p>
         </div>
 
@@ -94,7 +94,7 @@
                     <svg width="160" height="160"><circle cx="80" cy="80" r="74" stroke="#1e293b" stroke-width="8" fill="transparent" /><circle id="timer-progress" cx="80" cy="80" r="74" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="465" stroke-dashoffset="0" stroke-linecap="round" class="progress-ring text-main" /></svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="display-val" class="text-7xl font-black italic tracking-tighter">--</span></div>
                 </div>
-                <h3 id="action-title" class="text-3xl font-black mb-2 text-white uppercase italic tracking-widest">Ready?</h3>
+                <h3 id="action-title" class="text-3xl font-black mb-2 text-white uppercase italic tracking-tighter">Ready?</h3>
                 <p id="action-coach-name" class="text-lg text-slate-400 italic">等待任務中...</p>
             </div>
         </section>
@@ -107,7 +107,6 @@
                 <span id="pacing-val" class="text-2xl font-black text-main tracking-tighter">2.0s</span>
             </div>
             <input type="range" id="pacing-slider" min="2" max="5" step="0.5" value="2" oninput="updatePacing(this.value)">
-            <p class="text-[10px] text-slate-500 mt-3 text-center uppercase font-bold tracking-widest">向右滑動可放慢數數節奏</p>
         </div>
 
         <footer class="text-center py-12 border-t border-slate-800">
@@ -120,12 +119,12 @@
             <div class="text-9xl mb-8">🏆</div>
             <h2 class="text-3xl font-black text-white mb-6 italic">特訓全達成！</h2>
             <p id="reward-msg" class="text-xl text-slate-300 mb-10 leading-relaxed font-bold"></p>
-            <button onclick="closeModal()" class="w-full bg-main text-white font-black py-5 rounded-2xl shadow-xl">明天更強</button>
+            <button onclick="closeModal()" class="w-full bg-main text-white font-black py-5 rounded-2xl shadow-xl text-xl">明天更強</button>
         </div>
     </div>
 
     <script>
-        // --- 核心變數 ---
+        // --- 核心資料 ---
         let currentGender = 'male';
         let isVoiceOn = true;
         let activeExName = null;
@@ -158,14 +157,14 @@
         const configMap = () => {
             const isM = currentGender === 'male';
             return {
-                "伏地挺身": { sets: isM?3:2, reps: isM?12:8, tips: "與肩同寬，推起時吐氣，背部保持平直。" },
-                "負重深蹲": { sets: 3, reps: isM?15:12, tips: "重心在腳跟，屁股像坐椅子，膝蓋不超過腳尖。" },
-                "核心棒式": { sets: 3, reps: isM?40:30, tips: "全身呈一線，腹部收緊，不要憋氣。" },
-                "彈力繩划船": { sets: isM?3:2, reps: isM?12:10, tips: "挺胸夾緊背部，將帶子拉向腹部兩側。" },
-                "彈力繩胸推": { sets: isM?3:2, reps: isM?12:10, tips: "雙手前推感受胸肌收縮，慢放快推。" },
-                "勾腳尖蹬腿": { sets: 3, reps: 15, tips: "用力勾起腳尖，腿部完全伸直，保護膝蓋。" },
-                "二頭/三頭組合": { sets: isM?3:2, reps: isM?12:10, tips: "手肘固定不動，感受手臂肌肉緩慢收縮。" },
-                "開合跳": { sets: 3, reps: isM?40:30, tips: "輕盈跳躍，利用腳尖緩衝，雙手擊掌。" }
+                "伏地挺身": { sets: 3, reps: isM?12:8, type: "reps", tips: "與肩同寬，推起時吐氣，背部保持平直。" },
+                "負重深蹲": { sets: 3, reps: isM?15:12, type: "reps", tips: "重心在腳跟，屁股像坐椅子，膝蓋不超尖。" },
+                "核心棒式": { sets: 3, reps: 60, type: "secs", tips: "全身呈一線，腹部收緊，不要憋氣。" }, // 修正：60秒
+                "彈力繩划船": { sets: 3, reps: isM?12:10, type: "reps", tips: "挺胸夾緊背部，將帶子拉向後側。" },
+                "彈力繩胸推": { sets: 3, reps: isM?12:10, type: "reps", tips: "雙手前推感受胸肌收縮，慢放快推。" },
+                "勾腳尖蹬腿": { sets: 3, reps: 15, type: "reps", tips: "用力勾起腳尖，腿部完全伸直，保護膝蓋。" },
+                "二頭/三頭組合": { sets: 3, reps: isM?12:10, type: "reps", tips: "手肘固定不動，感受手臂肌肉緩慢收縮。" },
+                "開合跳": { sets: 3, reps: 40, type: "secs", tips: "輕盈跳躍，利用腳尖緩衝，雙手過頭。" }
             };
         };
 
@@ -198,13 +197,11 @@
             document.getElementById('action-title').innerText = name;
             renderDailyTasks();
 
-            const repsText = typeof ex.reps === 'number' ? ex.reps + "下" : ex.reps + "秒";
-            // --- 語音增加提醒調整快慢 ---
-            speak(`${hero.msg}。接下來是${name}，共${ex.sets}組，每組${repsText}。動作要領：${ex.tips}。朋友們，如果覺得太快或太慢，可以在下方調整動作快慢喔！`);
+            const unit = ex.type === "secs" ? "秒" : "下";
+            speak(`${hero.msg}。接下來是${name}，共${ex.sets}組，每組${ex.reps}${unit}。動作要領：${ex.tips}。朋友們，如果覺得太快或太慢，可以在下方調整動作快慢喔！`);
             
             workoutState = 'WORKING';
             setCounter = 1;
-            // 延長旁白等待時間至 10 秒
             timerId = setTimeout(() => startSetCycle(name), 10500);
         }
 
@@ -218,16 +215,16 @@
             
             speak(`${setNames[setCounter] || "下一組"}，開始！`);
 
-            // 強制延遲 2 秒才開始數數
             timerId = setTimeout(() => {
-                if (typeof ex.reps !== 'number') {
-                    let left = parseInt(ex.reps);
+                if (ex.type === "secs") {
+                    let left = ex.reps;
+                    document.getElementById('display-val').innerText = left;
                     timerId = setInterval(() => {
                         left--;
                         document.getElementById('display-val').innerText = left;
                         if (left <= 3 && left > 0) speak(left.toString());
                         if (left <= 0) { clearAllTimers(); finishSet(name); }
-                    }, 1000);
+                    }, 1000); // 計時固定 1 秒
                 } else {
                     const counting = () => {
                         if (workoutState !== 'WORKING') return;
@@ -235,12 +232,12 @@
                             repCounter++;
                             document.getElementById('display-val').innerText = repCounter;
                             speak(repCounter.toString());
-                            timerId = setTimeout(counting, pacingSeconds * 1000); // 使用 pacing 變數
+                            timerId = setTimeout(counting, pacingSeconds * 1000); // 計次受滑桿影響
                         } else { clearAllTimers(); finishSet(name); }
                     };
                     counting();
                 }
-            }, 2000);
+            }, 2000); // 喊完開始後靜默 2 秒
         }
 
         function finishSet(name) {
@@ -270,7 +267,8 @@
             if (!unlockedActions.includes(name)) return;
             if (!completedActions.includes(name)) completedActions.push(name);
             renderDailyTasks();
-            if (completedActions.length === 4) {
+            const required = currentGender === 'male' ? 4 : 4;
+            if (completedActions.length === required) {
                 const history = JSON.parse(localStorage.getItem('vHist_ycy_strict')) || [];
                 const ds = new Date().toLocaleDateString();
                 if (!history.includes(ds)) {
@@ -278,7 +276,7 @@
                     renderCalendar();
                     document.getElementById('reward-msg').innerText = `${currentGender==='male'?'你':'妳'}完成了今日特訓！By ycy 2026`;
                     document.getElementById('reward-modal').classList.remove('hidden');
-                    speak("今日任務全達成！朋友們，妳是真正的英雄！");
+                    speak("今日任務全達成！朋友們，妳做到了！");
                 }
             }
         }
@@ -299,30 +297,17 @@
                 const isDone = completedActions.includes(name);
                 const isActive = (activeExName === name);
                 const isUnlocked = unlockedActions.includes(name);
+                const unit = ex.type === "secs" ? "秒" : "下";
                 const card = document.createElement('div');
-                card.className = `glass p-8 rounded-[3.5rem] task-card ${isDone?'completed':''} ${isActive?'active-now':''}`;
-                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h4 class="font-black text-white text-2xl">${name}</h4><p class="text-base text-main uppercase font-bold tracking-widest">${ex.sets}組 ∙ ${ex.reps}${typeof ex.reps === 'number'?'下':''}</p></div><button onclick="runEx('${name}')" class="bg-slate-700 text-white text-sm font-black px-6 py-3 rounded-full active:scale-95">開始訓練</button></div><p class="text-base text-slate-300 mb-8 italic">動作要領：${ex.tips}</p><button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] font-black uppercase text-lg ${isDone?'bg-emerald-500 text-white':(isUnlocked?'btn-confirm-unlocked':'btn-confirm-locked')}">${isDone?'✅ 任務達成':(isUnlocked?'點擊確認完成':'運動三組後解鎖')}</button>`;
+                card.className = `glass p-8 rounded-[3rem] task-card ${isDone?'completed':''} ${isActive?'active-now':''}`;
+                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h4 class="font-black text-white text-2xl">${name}</h4><p class="text-base text-main uppercase font-bold tracking-widest">${ex.sets}組 ∙ ${ex.reps}${unit}</p></div><button onclick="runEx('${name}')" class="bg-slate-700 text-white text-sm font-black px-6 py-3 rounded-full active:scale-95">開始訓練</button></div><p class="text-base text-slate-300 mb-8 italic">動作要領：${ex.tips}</p><button onclick="confirmItem('${name}')" class="w-full py-5 rounded-[2rem] font-black uppercase text-lg ${isDone?'bg-emerald-500 text-white':(isUnlocked?'btn-confirm-unlocked':'btn-confirm-locked')}">${isDone?'✅ 任務達成':(isUnlocked?'點擊確認完成':'運動三組後解鎖')}</button>`;
                 listEl.appendChild(card);
             });
         }
 
-        function updatePacing(val) {
-            pacingSeconds = parseFloat(val);
-            document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s";
-        }
-
-        function selectDay(d) {
-            const idx = scheduleDays.indexOf(d);
-            if (idx > -1) scheduleDays.splice(idx, 1);
-            else if (scheduleDays.length < 4) scheduleDays.push(d);
-            updatePickerUI();
-        }
-        function updatePickerUI() {
-            document.querySelectorAll('.day-btn').forEach((btn, i) => {
-                const d = [1,2,3,4,5,6,0][i];
-                btn.className = scheduleDays.includes(d) ? 'day-btn active' : 'day-btn';
-            });
-        }
+        function updatePacing(val) { pacingSeconds = parseFloat(val); document.getElementById('pacing-val').innerText = pacingSeconds.toFixed(1) + "s"; }
+        function selectDay(d) { const idx = scheduleDays.indexOf(d); if (idx > -1) scheduleDays.splice(idx, 1); else if (scheduleDays.length < 4) scheduleDays.push(d); updatePickerUI(); }
+        function updatePickerUI() { document.querySelectorAll('.day-btn').forEach((btn, i) => { const d = [1,2,3,4,5,6,0][i]; btn.className = scheduleDays.includes(d) ? 'day-btn active' : 'day-btn'; }); }
         function confirmSchedule() { localStorage.setItem('vSch_ycy_strict_vFinal', JSON.stringify(scheduleDays)); renderCalendar(); renderDailyTasks(); speak("排程保存完成。"); }
         function resetSchedule() { scheduleDays = []; localStorage.removeItem('vSch_ycy_strict_vFinal'); updatePickerUI(); renderCalendar(); renderDailyTasks(); }
 
@@ -338,9 +323,7 @@
             for(let d=1; d<=total; d++) {
                 const dateObj = new Date(now.getFullYear(), now.getMonth(), d);
                 const ds = dateObj.toLocaleDateString();
-                const isToday = ds === new Date().toLocaleDateString();
-                const isSch = scheduleDays.includes(dateObj.getDay());
-                container.innerHTML += `<div class="calendar-day ${isToday?'today-mark':''} ${isSch?'workout-day':''} ${history.includes(ds)?'done-history':''}"><span>${d}</span></div>`;
+                container.innerHTML += `<div class="calendar-day ${ds===new Date().toLocaleDateString()?'today-mark':''} ${scheduleDays.includes(dateObj.getDay())?'workout-day':''} ${history.includes(ds)?'done-history':''}"><span>${d}</span></div>`;
             }
         }
 
@@ -354,7 +337,6 @@
 
         function toggleVoice() { isVoiceOn = !isVoiceOn; document.getElementById('voice-toggle').innerText = isVoiceOn ? '🔊' : '🔇'; }
         function closeModal() { document.getElementById('reward-modal').classList.add('hidden'); }
-
         window.onload = () => { updatePickerUI(); renderCalendar(); renderDailyTasks(); };
     </script>
 </body>
